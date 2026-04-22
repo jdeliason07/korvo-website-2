@@ -1,0 +1,21 @@
+{
+  "name": "korvo-website",
+  "version": "1.0.0",
+  "description": "Korvo AI official website",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "nodemailer": "^6.9.7",
+    "resend": "^6.9.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
