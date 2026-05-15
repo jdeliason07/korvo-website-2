@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog Post — Korvo AI</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="/" class="nav-logo">
+      <svg width="36" height="36" viewBox="0 0 100 100" aria-hidden="true">
+        <polygon points="50,2 98,50 50,50" fill="#2d6b4f"/>
+        <polygon points="50,2 2,50 50,50" fill="#1a5c3a"/>
+        <polygon points="2,50 50,98 50,50" fill="#1a5c3a"/>
+        <polygon points="98,50 50,98 50,50" fill="#b85c45"/>
+      </svg>
+      Korvo AI
+    </a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+      <li><a href="/learn-more">Services</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+      <li><a href="/story">Blog</a></li>
+      <li><a href="/book" class="btn btn-green">Free Consultation</a></li>
+    </ul>
+    <button class="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/about">About</a></li>
+    <li><a href="/learn-more">Services</a></li>
+    <li><a href="/pricing">Pricing</a></li>
+    <li><a href="/story">Blog</a></li>
+  </ul>
+  <a href="/book" class="btn btn-green mt-16">Free Consultation</a>
+</div>
+
+<div style="height:var(--nav-height);"></div>
+
+<div class="post-single">
+  <a href="/story" style="font-size:.85rem;font-weight:700;color:var(--green-dark);display:inline-flex;align-items:center;gap:6px;margin-bottom:32px;">&larr; Back to Blog</a>
+  <div class="post-meta" id="postMeta"></div>
+  <h1 id="postTitle">Loading…</h1>
+  <div class="post-body" id="postBody"></div>
+  <div style="margin-top:56px;padding-top:40px;border-top:1px solid var(--cream-dark);">
+    <h3 style="color:var(--green-dark);margin-bottom:8px;font-size:1.1rem;">Enjoyed this post?</h3>
+    <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:16px;">Book a free consultation to discover how AI can work for your business.</p>
+    <a href="/book" class="btn btn-primary">Book Free Consultation</a>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="nav-logo" style="display:inline-flex;margin-bottom:14px;"><svg width="28" height="28" viewBox="0 0 100 100"><polygon points="50,2 98,50 50,50" fill="#2d6b4f"/><polygon points="50,2 2,50 50,50" fill="#fff"/><polygon points="2,50 50,98 50,50" fill="#fff"/><polygon points="98,50 50,98 50,50" fill="#b85c45"/></svg><span style="color:#fff;">Korvo AI</span></a>
+        <p>Eliminating small business pain points with AI research, creation, and implementation.</p>
+      </div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a href="/about">About Us</a></li><li><a href="/story">Blog</a></li><li><a href="/pricing">Pricing</a></li><li><a href="/book">Book a Call</a></li></ul></div>
+      <div class="footer-col"><h4>Services</h4><ul><li><a href="/learn-more#voice">Voice Receptionist</a></li><li><a href="/learn-more#research">AI Research</a></li><li><a href="/learn-more#creation">AI Creation</a></li><li><a href="/learn-more#implementation">Implementation</a></li></ul></div>
+      <div class="footer-col"><h4>Contact</h4><ul><li><a href="mailto:jack@korvo.ai">jack@korvo.ai</a></li><li><a href="/book">Free Consultation</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span>&copy; 2026 Korvo AI. All rights reserved.</span><span>Provo, Utah &middot; <a href="mailto:jack@korvo.ai">jack@korvo.ai</a></span></div>
+  </div>
+</footer>
+<button class="scroll-top" aria-label="Back to top">&#8593;</button>
+<script src="/js/main.js"></script>
+<script>loadPost();</script>
+</body>
+</html>

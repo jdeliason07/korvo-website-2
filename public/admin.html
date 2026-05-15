@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Korvo AI</title>
+  <meta name="robots" content="noindex,nofollow" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body style="background:var(--cream);">
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
+    <div class="admin-login">
+      <div style="text-align:center;margin-bottom:24px;">
+        <svg width="44" height="44" viewBox="0 0 100 100" style="margin:0 auto 12px;">
+          <polygon points="50,2 98,50 50,50" fill="#2d6b4f"/>
+          <polygon points="50,2 2,50 50,50" fill="#1a5c3a"/>
+          <polygon points="2,50 50,98 50,50" fill="#1a5c3a"/>
+          <polygon points="98,50 50,98 50,50" fill="#b85c45"/>
+        </svg>
+        <h2>Korvo AI Admin</h2>
+      </div>
+      <div class="form-group">
+        <label for="adminKeyInput">Admin Password</label>
+        <input type="password" id="adminKeyInput" placeholder="Enter admin password" />
+      </div>
+      <button onclick="adminLogin()" class="btn btn-green" style="width:100%;">Sign In</button>
+      <div id="loginError" style="color:#dc3545;font-size:.88rem;margin-top:12px;display:none;">Incorrect password.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" style="display:none;">
+  <div class="admin-bar">
+    <div class="container">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <svg width="28" height="28" viewBox="0 0 100 100">
+          <polygon points="50,2 98,50 50,50" fill="#2d6b4f"/>
+          <polygon points="50,2 2,50 50,50" fill="#fff"/>
+          <polygon points="2,50 50,98 50,50" fill="#fff"/>
+          <polygon points="98,50 50,98 50,50" fill="#b85c45"/>
+        </svg>
+        <h1>Korvo AI Admin</h1>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/" style="color:rgba(255,255,255,.7);font-size:.85rem;">← View Site</a>
+        <button onclick="adminLogout()" class="btn btn-secondary" style="padding:8px 18px;font-size:.82rem;">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <div class="container">
+
+      <!-- NEW POST -->
+      <div class="admin-card">
+        <h2>New Blog Post</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Title *</label>
+            <input type="text" id="postTitle" placeholder="Post title" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="postCategory">
+              <option value="Korvo Updates">Korvo Updates</option>
+              <option value="AI for Small Business">AI for Small Business</option>
+              <option value="Industry Insights">Industry Insights</option>
+              <option value="How-To">How-To</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="postDate" />
+          </div>
+          <div class="form-group">
+            <label>Excerpt (optional)</label>
+            <input type="text" id="postExcerpt" placeholder="Short preview text (auto-generated if blank)" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Body *</label>
+          <textarea id="postBody" style="min-height:240px;" placeholder="Write your post content here. Use double line breaks for paragraphs."></textarea>
+        </div>
+        <button onclick="createPost()" class="btn btn-green">Publish Post</button>
+        <div id="postMsg" class="form-msg"></div>
+      </div>
+
+      <!-- EXISTING POSTS -->
+      <div class="admin-card">
+        <h2>Manage Posts</h2>
+        <ul id="postsList" style="list-style:none;">
+          <li style="color:var(--text-muted);font-size:.9rem;">Loading…</li>
+        </ul>
+      </div>
+
+      <!-- APPOINTMENTS -->
+      <div class="admin-card">
+        <h2>Consultation Requests</h2>
+        <div style="overflow-x:auto;">
+          <table class="appt-table" id="apptTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Service</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+            <tbody id="apptBody">
+              <tr><td colspan="6" style="color:var(--text-muted);">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>
