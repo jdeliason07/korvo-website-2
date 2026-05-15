@@ -8,32 +8,32 @@ const { Resend } = require('resend');
 const resend  = new Resend(process.env.RESEND_API_KEY);
 
 const POSTS_FILE = path.join(__dirname, 'data', 'posts.json');
-function getPosts()     { return JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8')); }
-function savePosts(d)   { fs.writeFileSync(POSTS_FILE, JSON.stringify(d, null, 2)); }
-function makeSlug(title){ return title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); }
+function getPosts()   { return JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8')); }
+function savePosts(d) { fs.writeFileSync(POSTS_FILE, JSON.stringify(d, null, 2)); }
+function makeSlug(t)  { return t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); }
 
 const APPTS_FILE = path.join(__dirname, 'data', 'appointments.json');
-function getAppts()   {
+function getAppts() {
   if (!fs.existsSync(APPTS_FILE)) return { appointments: [] };
   return JSON.parse(fs.readFileSync(APPTS_FILE, 'utf8'));
 }
 function saveAppts(d) { fs.writeFileSync(APPTS_FILE, JSON.stringify(d, null, 2)); }
 
-const app = express();
+const app  = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://esm.sh", "https://unpkg.com"],
-      scriptSrcElem: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://esm.sh", "https://unpkg.com"],
-      connectSrc: ["'self'", "https://cdn.jsdelivr.net", "https://esm.sh", "https://unpkg.com"],
-      imgSrc: ["'self'", "data:"],
-    }
-  }
+      styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc:    ["'self'", "https://fonts.gstatic.com"],
+      scriptSrc:  ["'self'", "'unsafe-inline'"],
+      scriptSrcElem: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'"],
+      imgSrc:     ["'self'", "data:", "https:"],
+    },
+  },
 }));
 app.use(cors());
 app.use(express.json());
@@ -41,19 +41,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Pages
-app.get('/',          (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.get('/learn-more',(req, res) => res.sendFile(path.join(__dirname, 'public', 'learn-more.html')));
-app.get('/about',     (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
-app.get('/pricing',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
-app.get('/book',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'book.html')));
-app.get('/story',     (req, res) => res.sendFile(path.join(__dirname, 'public', 'story.html')));
-app.get('/post',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'post.html')));
-app.get('/admin',     (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('/',           (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+app.get('/learn-more', (req, res) => res.sendFile(path.join(__dirname, 'public', 'learn-more.html')));
+app.get('/about',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
+app.get('/pricing',    (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
+app.get('/book',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'book.html')));
+app.get('/story',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'story.html')));
+app.get('/post',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'post.html')));
+app.get('/admin',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
 // API: Blog posts
 app.get('/api/posts', (req, res) => {
-  const data = getPosts();
-  res.json(data.posts);
+  res.json(getPosts().posts);
 });
 
 app.post('/api/posts', (req, res) => {
@@ -85,7 +84,7 @@ app.post('/api/posts/:id/delete', (req, res) => {
   res.json({ success: true });
 });
 
-// API: Contact / Booking form
+// API: Contact / booking form
 app.post('/api/contact', async (req, res) => {
   const { name, email, phone, service, preferred_time, message } = req.body;
   if (!name || !email || !message) {
@@ -94,7 +93,7 @@ app.post('/api/contact', async (req, res) => {
   try {
     await resend.emails.send({
       from: 'Korvo AI <onboarding@resend.dev>',
-      to: process.env.MAIL_TO,
+      to:   process.env.MAIL_TO,
       reply_to: email,
       subject: `New inquiry from ${name}`,
       text: [
@@ -117,10 +116,10 @@ app.post('/api/contact', async (req, res) => {
         service: service || '',
         preferred_time: preferred_time || '',
         message,
-        submitted: new Date().toISOString()
+        submitted: new Date().toISOString(),
       });
       saveAppts(appts);
-    } catch (_) { /* don't block response on storage error */ }
+    } catch (_) { /* don't block response */ }
     res.json({ success: true, message: "Thanks! We'll be in touch within one business day." });
   } catch (err) {
     console.error('Mail error:', err.message);
@@ -128,24 +127,23 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// API: Get appointments (admin only)
+// API: Appointments (admin)
 app.get('/api/appointments', (req, res) => {
   const { adminKey } = req.query;
   if (adminKey !== process.env.ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
   res.json(getAppts().appointments);
 });
 
-// API: Newsletter signup
+// API: Newsletter
 app.post('/api/newsletter', (req, res) => {
   const { email } = req.body;
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'A valid email is required.' });
   }
-  // TODO: add to mailing list / CRM
   console.log('Newsletter signup:', email);
   res.json({ success: true, message: "You're subscribed!" });
 });
 
 app.listen(PORT, () => {
-  console.log(`Korvo AI website running at http://localhost:${PORT}`);
+  console.log(`Korvo AI running at http://localhost:${PORT}`);
 });

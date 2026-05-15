@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: korvo-ai
+    runtime: node
+    buildCommand: npm install
+    startCommand: node app.js
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_TO
+        sync: false
+      - key: ADMIN_PASS
+        sync: false

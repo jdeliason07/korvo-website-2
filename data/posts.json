@@ -1,0 +1,31 @@
+{
+  "posts": [
+    {
+      "id": "1747267200000",
+      "slug": "what-is-ai-voice-receptionist",
+      "title": "What Is an AI Voice Receptionist — and Does Your Business Need One?",
+      "category": "AI for Small Business",
+      "date": "2026-05-14",
+      "excerpt": "Missed calls mean missed revenue. Here's how an AI voice receptionist works, what it can do for your small business, and whether it's right for you.",
+      "body": "Missed calls are one of the most common — and most expensive — problems small businesses face. A customer calls your medical office after hours, gets voicemail, and books with a competitor instead. An AI voice receptionist changes that.\n\nAn AI voice receptionist is a software agent that answers your phone calls, engages callers in natural conversation, books appointments, answers frequently asked questions, and routes complex calls to a human — all automatically, 24 hours a day.\n\nUnlike the old-school phone trees you're used to pressing buttons through, modern AI voice agents (built on large language models) actually understand what callers are saying and respond intelligently. They don't read from scripts — they listen and adapt.\n\nHere's what a typical Korvo AI voice receptionist can do:\n\n- Answer calls instantly, with no hold music\n- Book appointments directly into your calendar system\n- Answer common questions (hours, location, services, pricing)\n- Collect caller information and pass it to your team\n- Escalate to a human when needed\n- Work nights, weekends, and holidays\n\nFor medical offices, dental practices, and appointment-based businesses, the ROI case is simple: one additional booking per day, retained because the call was answered, pays for the system many times over.\n\nNot sure if your business is the right fit? Book a free consultation — we'll be honest about whether it makes sense for you."
+    },
+    {
+      "id": "1747180800000",
+      "slug": "roi-based-pricing-explained",
+      "title": "Why We Charge Based on ROI (Not a Flat Rate)",
+      "category": "Korvo Updates",
+      "date": "2026-05-13",
+      "excerpt": "Most SaaS companies charge you the same amount whether their software works or not. We think that's backwards. Here's how our pricing model is different.",
+      "body": "If you've ever paid a monthly subscription for a software tool that didn't quite deliver, you know how frustrating it is to keep justifying the expense.\n\nAt Korvo AI, we built our pricing model to fix exactly that problem.\n\nHere's how it works: after an initial implementation fee (which covers the real cost of building and deploying your custom AI tools), your ongoing monthly subscription is calculated as a percentage of your measurable monthly Korvo AI ROI.\n\nWhat does that mean in practice? We agree upfront on how we'll measure the value your AI system generates — saved staff hours, additional bookings captured, reduced no-shows, or other metrics specific to your business. Each month, we track those numbers. Your subscription reflects the results.\n\nIf your AI isn't delivering? Your bill drops. If it's performing beyond expectations? You pay a fair share of the value it's creating.\n\nWe chose this model for two reasons.\n\nFirst, it's the right thing to do. We're students — we understand tight budgets, and we don't think you should pay for something that isn't working.\n\nSecond, it keeps us accountable. When our revenue depends on your results, we have every incentive to keep your AI tools performing and improving.\n\nReady to see what your ROI could look like? Book a free consultation — we'll run the numbers with you."
+    },
+    {
+      "id": "1747094400000",
+      "slug": "why-student-developers-are-your-advantage",
+      "title": "Why Hiring Student Developers Is Actually a Competitive Advantage",
+      "category": "AI for Small Business",
+      "date": "2026-05-12",
+      "excerpt": "The conventional wisdom says you need seasoned professionals for serious AI work. We'd respectfully disagree — and here's why.",
+      "body": "There's a common assumption that experience always beats youth in technology. We'd argue that in the world of AI — where the landscape changes monthly — that assumption is worth questioning.\n\nHere's the reality: many of the senior developers at large AI agencies learned their foundational skills 10 or 15 years ago. They've adapted to new tools, yes. But their mental models and instincts were built in a different era.\n\nStudent developers at BYU's computer science program are studying large language models, voice AI, and automation pipelines right now — in current coursework, in research labs, alongside professors who are actively publishing in these fields.\n\nThat means when we build an AI voice receptionist or a custom automation pipeline for your business, we're not repurposing decade-old approaches. We're applying the most current techniques available.\n\nAnd because we're students, our overhead is significantly lower than traditional agencies. We pass those savings directly to clients — which is how we're able to offer top-tier AI at a fraction of the usual price.\n\nThis is Korvo AI's core thesis: the combination of current education and lower cost isn't a compromise. It's a better deal.\n\nIf you're curious what that deal could look like for your business, reach out. We'd love to show you."
+    }
+  ]
+}
