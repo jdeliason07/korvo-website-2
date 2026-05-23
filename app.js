@@ -6,7 +6,7 @@ const path    = require('path');
 const fs      = require('fs');
 const { Resend } = require('resend');
 const resend  = new Resend(process.env.RESEND_API_KEY);
-const ADMIN_PASS = ADMIN_PASS || 'korvo2026';
+const ADMIN_PASS = process.env.ADMIN_PASS || 'korvo2026';
 
 const POSTS_FILE = path.join(__dirname, 'data', 'posts.json');
 function getPosts()   { return JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8')); }
