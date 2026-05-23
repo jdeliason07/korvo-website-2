@@ -32,6 +32,7 @@ app.use(helmet({
       scriptSrcElem: ["'self'", "'unsafe-inline'"],
       connectSrc: ["'self'"],
       imgSrc:     ["'self'", "data:", "https:"],
+      frameSrc:   ["https://forms.office.com"],
     },
   },
 }));
