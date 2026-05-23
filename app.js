@@ -6,6 +6,7 @@ const path    = require('path');
 const fs      = require('fs');
 const { Resend } = require('resend');
 const resend  = new Resend(process.env.RESEND_API_KEY);
+const ADMIN_PASS = ADMIN_PASS || 'korvo2026';
 
 const POSTS_FILE = path.join(__dirname, 'data', 'posts.json');
 function getPosts()   { return JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8')); }
@@ -58,7 +59,7 @@ app.get('/api/posts', (req, res) => {
 
 app.post('/api/posts', (req, res) => {
   const { adminKey, title, category, excerpt, body, date } = req.body;
-  if (adminKey !== process.env.ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
+  if (adminKey !== ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
   if (!title || !body) return res.status(400).json({ error: 'Title and body are required.' });
   const data = getPosts();
   const slug = makeSlug(title);
@@ -78,7 +79,7 @@ app.post('/api/posts', (req, res) => {
 
 app.post('/api/posts/:id/delete', (req, res) => {
   const { adminKey } = req.body;
-  if (adminKey !== process.env.ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
+  if (adminKey !== ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
   const data = getPosts();
   data.posts = data.posts.filter(p => p.id !== req.params.id);
   savePosts(data);
@@ -131,7 +132,7 @@ app.post('/api/contact', async (req, res) => {
 // API: Appointments (admin)
 app.get('/api/appointments', (req, res) => {
   const { adminKey } = req.query;
-  if (adminKey !== process.env.ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
+  if (adminKey !== ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
   res.json(getAppts().appointments);
 });
 
