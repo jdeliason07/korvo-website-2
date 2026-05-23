@@ -2,9 +2,21 @@ let ADMIN_KEY = '';
 
 function adminLogin() {
   const key = document.getElementById('adminKeyInput').value.trim();
-  if (!key) return;
+  const btn = document.querySelector('#loginScreen button');
+  const err = document.getElementById('loginError');
+  err.style.display = 'none';
+  if (!key) {
+    err.textContent = 'Please enter your password.';
+    err.style.display = 'block';
+    return;
+  }
   ADMIN_KEY = key;
-  verifyAndLoad();
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  verifyAndLoad().finally(() => {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  });
 }
 
 document.getElementById('adminKeyInput')?.addEventListener('keydown', e => {
@@ -12,10 +24,18 @@ document.getElementById('adminKeyInput')?.addEventListener('keydown', e => {
 });
 
 async function verifyAndLoad() {
+  const err = document.getElementById('loginError');
   try {
     const res = await fetch(`/api/appointments?adminKey=${encodeURIComponent(ADMIN_KEY)}`);
     if (res.status === 401) {
-      document.getElementById('loginError').style.display = 'block';
+      err.textContent = 'Incorrect password.';
+      err.style.display = 'block';
+      ADMIN_KEY = '';
+      return;
+    }
+    if (!res.ok) {
+      err.textContent = `Server error (${res.status}). Try again.`;
+      err.style.display = 'block';
       ADMIN_KEY = '';
       return;
     }
@@ -27,9 +47,10 @@ async function verifyAndLoad() {
 
     loadPosts();
     loadAppointments();
-  } catch {
-    document.getElementById('loginError').textContent = 'Could not connect.';
-    document.getElementById('loginError').style.display = 'block';
+  } catch (e) {
+    err.textContent = 'Could not connect to server. Is the site up?';
+    err.style.display = 'block';
+    ADMIN_KEY = '';
   }
 }
 
