@@ -64,15 +64,19 @@ async function loadPosts() {
 
 async function createPost() {
   const msg = document.getElementById('postMsg');
+  const btn = document.querySelector('[onclick="createPost()"]');
   msg.className = 'form-msg';
 
   const title = document.getElementById('postTitle').value.trim();
   const body  = document.getElementById('postBody').value.trim();
   if (!title || !body) {
     msg.textContent = 'Title and body are required.';
-    msg.classList.add('error');
+    msg.className = 'form-msg error';
     return;
   }
+
+  btn.disabled = true;
+  btn.textContent = 'Publishing…';
 
   try {
     const res = await fetch('/api/posts', {
@@ -87,21 +91,25 @@ async function createPost() {
         excerpt: document.getElementById('postExcerpt').value.trim(),
       }),
     });
-    const data = await res.json();
+    let data = {};
+    try { data = await res.json(); } catch {}
     if (res.ok) {
       msg.textContent = 'Post published!';
-      msg.classList.add('success');
+      msg.className = 'form-msg success';
       document.getElementById('postTitle').value = '';
       document.getElementById('postBody').value = '';
       document.getElementById('postExcerpt').value = '';
       loadPosts();
     } else {
-      msg.textContent = data.error || 'Something went wrong.';
-      msg.classList.add('error');
+      msg.textContent = data.error || `Error ${res.status}`;
+      msg.className = 'form-msg error';
     }
-  } catch {
-    msg.textContent = 'Network error.';
-    msg.classList.add('error');
+  } catch (err) {
+    msg.textContent = 'Network error: ' + err.message;
+    msg.className = 'form-msg error';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Publish Post';
   }
 }
 

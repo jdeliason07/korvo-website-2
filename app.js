@@ -61,20 +61,25 @@ app.post('/api/posts', (req, res) => {
   const { adminKey, title, category, excerpt, body, date } = req.body;
   if (adminKey !== ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
   if (!title || !body) return res.status(400).json({ error: 'Title and body are required.' });
-  const data = getPosts();
-  const slug = makeSlug(title);
-  const post = {
-    id: Date.now().toString(),
-    slug,
-    title,
-    category: category || 'Korvo Updates',
-    date: date || new Date().toISOString().split('T')[0],
-    excerpt: excerpt || body.substring(0, 180).trim() + '…',
-    body,
-  };
-  data.posts.unshift(post);
-  savePosts(data);
-  res.json({ success: true, post });
+  try {
+    const data = getPosts();
+    const slug = makeSlug(title);
+    const post = {
+      id: Date.now().toString(),
+      slug,
+      title,
+      category: category || 'Korvo Updates',
+      date: date || new Date().toISOString().split('T')[0],
+      excerpt: excerpt || body.substring(0, 180).trim() + '…',
+      body,
+    };
+    data.posts.unshift(post);
+    savePosts(data);
+    res.json({ success: true, post });
+  } catch (err) {
+    console.error('Create post error:', err);
+    res.status(500).json({ error: 'Failed to save post: ' + err.message });
+  }
 });
 
 app.post('/api/posts/:id/delete', (req, res) => {
