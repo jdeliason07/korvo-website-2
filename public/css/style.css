@@ -120,7 +120,7 @@ nav.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.07); }
   background: linear-gradient(150deg, rgba(26,92,58,0.15) 0%, transparent 55%);
   pointer-events: none;
 }
-.hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
+.hero-inner { display: grid; grid-template-columns: 1fr 1.1fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
 .hero-brand { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
 .hero-brand-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 700; color: var(--white); }
 .hero-tagline { font-size: 1rem; color: rgba(255,255,255,0.78); margin-bottom: 24px; font-style: italic; }
@@ -130,7 +130,7 @@ nav.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,0.07); }
   display: flex; align-items: center; justify-content: center;
 }
 .hero-photo-wrap {
-  width: 100%; max-width: 480px; border-radius: 16px; overflow: hidden;
+  width: 100%; max-width: 580px; border-radius: 16px; overflow: hidden;
   box-shadow: 0 24px 60px rgba(0,0,0,0.22);
   aspect-ratio: 4/3; background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
   display: flex; align-items: center; justify-content: center;
