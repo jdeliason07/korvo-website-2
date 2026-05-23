@@ -85,7 +85,7 @@ async function loadPosts() {
 
 async function createPost() {
   const msg = document.getElementById('postMsg');
-  const btn = document.querySelector('[onclick="createPost()"]');
+  const btn = document.getElementById('publishBtn');
   msg.className = 'form-msg';
 
   const title = document.getElementById('postTitle').value.trim();
