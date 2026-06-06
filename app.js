@@ -8,11 +8,6 @@ const { Resend } = require('resend');
 const resend  = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_PASS = process.env.ADMIN_PASS || 'korvo2026';
 
-const POSTS_FILE = path.join(__dirname, 'data', 'posts.json');
-function getPosts()   { return JSON.parse(fs.readFileSync(POSTS_FILE, 'utf8')); }
-function savePosts(d) { fs.writeFileSync(POSTS_FILE, JSON.stringify(d, null, 2)); }
-function makeSlug(t)  { return t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''); }
-
 const APPTS_FILE = path.join(__dirname, 'data', 'appointments.json');
 function getAppts() {
   if (!fs.existsSync(APPTS_FILE)) return { appointments: [] };
@@ -49,48 +44,7 @@ app.get('/learn-more', (req, res) => res.sendFile(path.join(__dirname, 'public',
 app.get('/about',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'about.html')));
 app.get('/pricing',    (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
 app.get('/book',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'book.html')));
-app.get('/story',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'story.html')));
-app.get('/post',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'post.html')));
 app.get('/admin',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-
-// API: Blog posts
-app.get('/api/posts', (req, res) => {
-  res.json(getPosts().posts);
-});
-
-app.post('/api/posts', (req, res) => {
-  const { adminKey, title, category, excerpt, body, date } = req.body;
-  if (adminKey !== ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
-  if (!title || !body) return res.status(400).json({ error: 'Title and body are required.' });
-  try {
-    const data = getPosts();
-    const slug = makeSlug(title);
-    const post = {
-      id: Date.now().toString(),
-      slug,
-      title,
-      category: category || 'Korvo Updates',
-      date: date || new Date().toISOString().split('T')[0],
-      excerpt: excerpt || body.substring(0, 180).trim() + '…',
-      body,
-    };
-    data.posts.unshift(post);
-    savePosts(data);
-    res.json({ success: true, post });
-  } catch (err) {
-    console.error('Create post error:', err);
-    res.status(500).json({ error: 'Failed to save post: ' + err.message });
-  }
-});
-
-app.post('/api/posts/:id/delete', (req, res) => {
-  const { adminKey } = req.body;
-  if (adminKey !== ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
-  const data = getPosts();
-  data.posts = data.posts.filter(p => p.id !== req.params.id);
-  savePosts(data);
-  res.json({ success: true });
-});
 
 // API: Contact / booking form
 app.post('/api/contact', async (req, res) => {

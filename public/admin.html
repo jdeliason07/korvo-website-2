@@ -56,50 +56,6 @@
   <div class="admin-body">
     <div class="container">
 
-      <!-- NEW POST -->
-      <div class="admin-card">
-        <h2>New Blog Post</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Title *</label>
-            <input type="text" id="postTitle" placeholder="Post title" />
-          </div>
-          <div class="form-group">
-            <label>Category</label>
-            <select id="postCategory">
-              <option value="Korvo Updates">Korvo Updates</option>
-              <option value="AI for Small Business">AI for Small Business</option>
-              <option value="Industry Insights">Industry Insights</option>
-              <option value="How-To">How-To</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Date</label>
-            <input type="date" id="postDate" />
-          </div>
-          <div class="form-group">
-            <label>Excerpt (optional)</label>
-            <input type="text" id="postExcerpt" placeholder="Short preview text (auto-generated if blank)" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Body *</label>
-          <textarea id="postBody" style="min-height:240px;" placeholder="Write your post content here. Use double line breaks for paragraphs."></textarea>
-        </div>
-        <button id="publishBtn" onclick="createPost()" class="btn btn-green">Publish Post</button>
-        <div id="postMsg" class="form-msg"></div>
-      </div>
-
-      <!-- EXISTING POSTS -->
-      <div class="admin-card">
-        <h2>Manage Posts</h2>
-        <ul id="postsList" style="list-style:none;">
-          <li style="color:var(--text-muted);font-size:.9rem;">Loading…</li>
-        </ul>
-      </div>
-
       <!-- APPOINTMENTS -->
       <div class="admin-card">
         <h2>Consultation Requests</h2>

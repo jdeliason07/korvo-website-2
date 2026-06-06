@@ -30,7 +30,6 @@
       <li><a href="/about">About</a></li>
       <li><a href="/learn-more">Services</a></li>
       <li><a href="/pricing">Pricing</a></li>
-      <li><a href="/story">Blog</a></li>
       <li><a href="/book" class="btn btn-green">Free Consultation</a></li>
     </ul>
     <button class="hamburger" aria-label="Open menu">
@@ -46,7 +45,6 @@
     <li><a href="/about">About</a></li>
     <li><a href="/learn-more">Services</a></li>
     <li><a href="/pricing">Pricing</a></li>
-    <li><a href="/story">Blog</a></li>
   </ul>
   <a href="/book" class="btn btn-green mt-16">Free Consultation</a>
 </div>
@@ -68,6 +66,28 @@
           <img src="/images/hero.jpg" alt="Small business owner served by Korvo AI" onerror="this.parentElement.innerHTML='<div class=\'hero-photo-placeholder\' style=\'color:rgba(255,255,255,.4);text-align:center;padding:40px;font-size:.9rem;\'>Add hero.jpg to public/images/</div>'" />
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA + SURVEY -->
+<section class="cta-banner">
+  <div class="container">
+    <h2>Ready to let AI work for your business?</h2>
+    <p>Take our 2-minute survey so we know exactly how to help — or book a free consultation directly.</p>
+    <a href="/book" class="btn btn-secondary btn-lg" style="margin-bottom:40px;">Book Free Consultation</a>
+    <div style="background:rgba(255,255,255,0.06);border-radius:var(--radius);overflow:hidden;max-width:700px;margin:0 auto;">
+      <iframe
+        src="https://forms.office.com/pages/responsepage.aspx?id=DsSU_sCCqUurnhtPox0fF7kld5jhjItAvxn5SlMC6SRUMTY5RjY2UE5QUUpUSUpRMTZFWUNPNjBOTi4u&embed=true"
+        width="100%"
+        height="520"
+        frameborder="0"
+        marginwidth="0"
+        marginheight="0"
+        style="border:none;display:block;"
+        allowfullscreen
+        title="Korvo AI Quick Survey">
+      </iframe>
     </div>
   </div>
 </section>
@@ -199,43 +219,6 @@
   </div>
 </section>
 
-<!-- LATEST POSTS -->
-<section class="section">
-  <div class="container">
-    <div class="section-label">Insights</div>
-    <h2 class="section-title">From the Korvo Blog</h2>
-    <p class="section-subtitle">AI news, tips, and updates — written by students who are living it.</p>
-    <div class="blog-grid" id="homePosts">
-      <p style="color:var(--text-muted)">Loading posts…</p>
-    </div>
-    <div class="text-center mt-48">
-      <a href="/story" class="btn btn-outline">View All Posts</a>
-    </div>
-  </div>
-</section>
-
-<!-- CTA + SURVEY -->
-<section class="cta-banner">
-  <div class="container">
-    <h2>Ready to let AI work for your business?</h2>
-    <p>Take our 2-minute survey so we know exactly how to help — or book a free consultation directly.</p>
-    <a href="/book" class="btn btn-secondary btn-lg" style="margin-bottom:40px;">Book Free Consultation</a>
-    <div style="background:rgba(255,255,255,0.06);border-radius:var(--radius);overflow:hidden;max-width:700px;margin:0 auto;">
-      <iframe
-        src="https://forms.office.com/pages/responsepage.aspx?id=DsSU_sCCqUurnhtPox0fF7kld5jhjItAvxn5SlMC6SRUMTY5RjY2UE5QUUpUSUpRMTZFWUNPNjBOTi4u&embed=true"
-        width="100%"
-        height="520"
-        frameborder="0"
-        marginwidth="0"
-        marginheight="0"
-        style="border:none;display:block;"
-        allowfullscreen
-        title="Korvo AI Quick Survey">
-      </iframe>
-    </div>
-  </div>
-</section>
-
 <!-- FOOTER -->
 <footer>
   <div class="container">
@@ -263,7 +246,6 @@
         <h4>Company</h4>
         <ul>
           <li><a href="/about">About Us</a></li>
-          <li><a href="/story">Blog</a></li>
           <li><a href="/pricing">Pricing</a></li>
           <li><a href="/book">Book a Call</a></li>
         </ul>
@@ -293,6 +275,5 @@
 <button class="scroll-top" aria-label="Back to top">&#8593;</button>
 
 <script src="/js/main.js"></script>
-<script>loadPosts('homePosts', 3);</script>
 </body>
 </html>
