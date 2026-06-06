@@ -42,10 +42,6 @@ async function verifyAndLoad() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
 
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('postDate').value = today;
-
-    loadPosts();
     loadAppointments();
   } catch (e) {
     err.textContent = 'Could not connect to server. Is the site up?';
@@ -59,94 +55,6 @@ function adminLogout() {
   document.getElementById('adminPanel').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'block';
   document.getElementById('adminKeyInput').value = '';
-}
-
-async function loadPosts() {
-  const list = document.getElementById('postsList');
-  try {
-    const res = await fetch('/api/posts');
-    const posts = await res.json();
-    if (!posts.length) {
-      list.innerHTML = '<li style="color:var(--text-muted);font-size:.9rem;">No posts yet.</li>';
-      return;
-    }
-    list.innerHTML = posts.map(p => `
-      <li class="admin-post-item">
-        <div>
-          <h4>${p.title}</h4>
-          <div class="admin-post-meta">${p.category} &middot; ${p.date}</div>
-        </div>
-        <button class="btn-delete" onclick="deletePost('${p.id}')">Delete</button>
-      </li>`).join('');
-  } catch {
-    list.innerHTML = '<li style="color:#dc3545;">Could not load posts.</li>';
-  }
-}
-
-async function createPost() {
-  const msg = document.getElementById('postMsg');
-  const btn = document.getElementById('publishBtn');
-  msg.className = 'form-msg';
-
-  const title = document.getElementById('postTitle').value.trim();
-  const body  = document.getElementById('postBody').value.trim();
-  if (!title || !body) {
-    msg.textContent = 'Title and body are required.';
-    msg.className = 'form-msg error';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = 'Publishing…';
-
-  try {
-    const res = await fetch('/api/posts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        adminKey: ADMIN_KEY,
-        title,
-        body,
-        category: document.getElementById('postCategory').value,
-        date: document.getElementById('postDate').value,
-        excerpt: document.getElementById('postExcerpt').value.trim(),
-      }),
-    });
-    let data = {};
-    try { data = await res.json(); } catch {}
-    if (res.ok) {
-      msg.textContent = 'Post published!';
-      msg.className = 'form-msg success';
-      document.getElementById('postTitle').value = '';
-      document.getElementById('postBody').value = '';
-      document.getElementById('postExcerpt').value = '';
-      loadPosts();
-    } else {
-      msg.textContent = data.error || `Error ${res.status}`;
-      msg.className = 'form-msg error';
-    }
-  } catch (err) {
-    msg.textContent = 'Network error: ' + err.message;
-    msg.className = 'form-msg error';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Publish Post';
-  }
-}
-
-async function deletePost(id) {
-  if (!confirm('Delete this post? This cannot be undone.')) return;
-  try {
-    const res = await fetch(`/api/posts/${id}/delete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminKey: ADMIN_KEY }),
-    });
-    if (res.ok) loadPosts();
-    else alert('Could not delete post.');
-  } catch {
-    alert('Network error.');
-  }
 }
 
 async function loadAppointments() {
