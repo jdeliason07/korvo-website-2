@@ -133,24 +133,29 @@
   .login-card .act{width:100%;justify-content:center;display:block;}
   .login-err{color:var(--terracotta);font-size:12px;font-weight:700;margin-top:12px;min-height:16px;}
 
-  /* SAVED-CALLS DRAWER */
-  .drawer{position:fixed;inset:0;z-index:250;display:none;}
-  .drawer.open{display:block;}
-  .drawer-scrim{position:absolute;inset:0;background:rgba(19,47,30,.45);}
-  .drawer-panel{position:absolute;top:0;left:0;height:100%;width:380px;max-width:88vw;background:var(--paper);box-shadow:4px 0 30px rgba(0,0,0,.25);display:flex;flex-direction:column;z-index:1;}
-  .drawer-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;background:var(--pine);color:var(--cream);font-family:'Playfair Display',serif;font-size:18px;}
-  .drawer-close{background:none;border:none;color:var(--cream);font-size:26px;cursor:pointer;line-height:1;}
-  .drawer-list{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
-  .call-item{text-align:left;background:#fff;border:1px solid var(--linen);border-radius:4px;padding:12px 36px 12px 14px;cursor:pointer;transition:border-color .15s,background .15s;position:relative;}
-  .call-item:hover{border-color:var(--sage);background:var(--cream);}
-  .call-item.active{border-color:var(--sage);background:rgba(94,139,111,.12);}
-  .call-item .ci-name{font-weight:700;color:var(--pine);font-size:14px;}
-  .call-item .ci-meta{font-size:11px;color:var(--ink-soft);margin-top:3px;}
-  .call-item .ci-del{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--ink-soft);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:3px;line-height:1;}
-  .call-item .ci-del:hover{color:var(--terracotta);background:rgba(184,92,58,.1);}
-  .drawer-empty{color:var(--ink-soft);font-size:13px;text-align:center;padding:30px 12px;}
+  /* CLIENT LIST VIEW */
+  .list-hero{background:var(--pine);padding:44px clamp(20px,6vw,56px);position:relative;overflow:hidden;}
+  .list-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border:1px solid rgba(94,139,111,.12);border-radius:50%;}
+  .list-hero-inner{max-width:1000px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative;z-index:1;}
+  .list-title{font-family:'Playfair Display',serif;font-size:clamp(34px,5vw,48px);font-weight:800;color:var(--cream);line-height:1;letter-spacing:-.02em;}
+  .list-count{font-size:13px;color:rgba(240,235,226,.6);margin-top:10px;}
+  .list-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .list-wrap{max-width:1000px;margin:0 auto;padding:32px clamp(20px,6vw,56px) 72px;}
+  .client-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+  .client-card{position:relative;background:#fff;border:1px solid var(--linen);border-radius:6px;padding:22px 22px 20px;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s;}
+  .client-card:hover{border-color:var(--sage);box-shadow:0 8px 24px rgba(26,74,46,.1);transform:translateY(-2px);}
+  .client-card .cc-name{font-family:'Playfair Display',serif;font-weight:700;font-size:20px;color:var(--pine);line-height:1.15;margin-bottom:10px;padding-right:26px;}
+  .client-card .cc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:4px;}
+  .client-card .cc-tag{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--pine);background:rgba(94,139,111,.14);border-radius:3px;padding:4px 8px;}
+  .client-card .cc-meta{font-size:12.5px;color:var(--ink-soft);line-height:1.7;}
+  .client-card .cc-del{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--ink-soft);font-size:20px;cursor:pointer;padding:2px 7px;border-radius:3px;line-height:1;}
+  .client-card .cc-del:hover{color:var(--terracotta);background:rgba(184,92,58,.1);}
+  .client-empty{grid-column:1/-1;text-align:center;color:var(--ink-soft);padding:64px 20px;}
+  .client-empty .ce-title{font-family:'Playfair Display',serif;font-size:24px;color:var(--pine);margin-bottom:8px;}
 
   @media (max-width:680px){
+    .list-hero-inner{align-items:flex-start;}
+    .client-grid{grid-template-columns:1fr;}
     header{padding:16px 20px;} .header-right{display:none;}
     .hero{padding:32px 20px 40px;} .hero h1{font-size:26px;}
     .container{padding:18px 14px 60px;}
@@ -209,41 +214,49 @@
   <div class="header-right"><a href="/admin">&larr; Admin</a></div>
 </header>
 
-<div class="hero">
-  <div class="hero-eyebrow">Discovery Intake</div>
-  <h1>Capture the call. <em>Build</em> the case study.</h1>
-  <p>Fill this in live. Lead with the baseline numbers — they're what turn a working phone agent into proof.</p>
+<!-- LIST VIEW (landing page after login) -->
+<div id="listView">
+  <div class="list-hero">
+    <div class="list-hero-inner">
+      <div>
+        <div class="hero-eyebrow">Discovery Intake</div>
+        <h1 class="list-title">Clients</h1>
+        <p class="list-count" id="clientCount"></p>
+      </div>
+      <div class="list-actions">
+        <button class="act primary" onclick="newCall()">+ New client</button>
+        <button class="act ghost" onclick="logout()">Sign out</button>
+      </div>
+    </div>
+  </div>
+  <div class="list-wrap">
+    <div class="client-grid" id="clientGrid"></div>
+  </div>
 </div>
 
-<div class="actions">
-  <span class="progress" id="progress">0 / 0 answered</span>
-  <span class="rec-badge" id="recBadge">New client</span>
-  <span class="spacer"></span>
-  <button class="act primary" onclick="saveCall()">Save</button>
-  <button class="act" onclick="openDrawer()">Saved clients</button>
-  <button class="act ghost" onclick="newCall()">New client</button>
-  <button class="act" onclick="copyMarkdown()">Copy MD</button>
-  <button class="act" onclick="window.print()">Print / PDF</button>
-  <button class="act ghost" onclick="logout()">Sign out</button>
+<!-- FORM VIEW (one client's intake) -->
+<div id="formView" style="display:none;">
+  <div class="actions">
+    <button class="act" onclick="showList()">&larr; Clients</button>
+    <span class="progress" id="progress">0 / 0 answered</span>
+    <span class="rec-badge" id="recBadge">New client</span>
+    <span class="spacer"></span>
+    <button class="act primary" onclick="saveCall()">Save</button>
+    <button class="act ghost" onclick="newCall()">New client</button>
+    <button class="act" onclick="copyMarkdown()">Copy MD</button>
+    <button class="act" onclick="window.print()">Print / PDF</button>
+    <button class="act ghost" onclick="logout()">Sign out</button>
+  </div>
+
+  <div class="warn"><div class="warn-inner">
+    <strong>Saved to the Korvo database.</strong> Hit <em>Save</em> to store this client. It will appear in your client list — reopen and edit it anytime.
+  </div></div>
+
+  <div class="container" id="form"><!-- rendered from SCHEMA --></div>
 </div>
-
-<div class="warn"><div class="warn-inner">
-  <strong>Saved to the Korvo database.</strong> Hit <em>Save</em> to store this client. Each save is its own client record — reopen and edit any client from <em>Saved clients</em>.
-</div></div>
-
-<div class="container" id="form"><!-- rendered from SCHEMA --></div>
 
 <footer><strong>Korvo AI</strong> &nbsp;·&nbsp; korvo.ai</footer>
 </div><!-- /#app -->
-
-<!-- SAVED-CALLS DRAWER -->
-<div class="drawer" id="drawer">
-  <div class="drawer-scrim" onclick="closeDrawer()"></div>
-  <div class="drawer-panel">
-    <div class="drawer-head"><span>Saved Clients</span><button class="drawer-close" onclick="closeDrawer()">&times;</button></div>
-    <div class="drawer-list" id="drawerList"></div>
-  </div>
-</div>
 
 <div id="toast"></div>
 
@@ -606,12 +619,25 @@ async function doLogin(){
 function enterApp(list){
   document.getElementById('login').style.display='none';
   document.getElementById('app').style.display='';
-  render();
-  setBadge();
-  renderList(list);
+  render();          // build the form once (kept hidden until a client is opened)
+  renderList(list);  // populate the client cards
+  showList();
 }
 
 function logout(){ sessionStorage.removeItem('korvoAdminKey'); location.reload(); }
+
+/* view switching */
+function showList(){
+  document.getElementById('formView').style.display='none';
+  document.getElementById('listView').style.display='';
+  window.scrollTo(0,0);
+  loadList();
+}
+function showForm(){
+  document.getElementById('listView').style.display='none';
+  document.getElementById('formView').style.display='';
+  window.scrollTo(0,0);
+}
 
 async function loadList(){
   try{
@@ -623,16 +649,25 @@ async function loadList(){
 }
 
 function renderList(list){
-  const c = document.getElementById('drawerList');
-  if(!list || !list.length){ c.innerHTML='<div class="drawer-empty">No saved clients yet.</div>'; return; }
+  const c = document.getElementById('clientGrid');
+  const count = document.getElementById('clientCount');
+  if(count) count.textContent = (list && list.length) ? `${list.length} client${list.length===1?'':'s'}` : '';
+  if(!list || !list.length){
+    c.innerHTML = '<div class="client-empty"><div class="ce-title">No clients yet</div><div>Hit &ldquo;+ New client&rdquo; to create your first one.</div></div>';
+    return;
+  }
   c.innerHTML = list.map(r=>{
-    const name = r.practiceName || '(unnamed practice)';
-    const date = r.callDate || (r.updatedAt? new Date(r.updatedAt).toLocaleDateString() : '');
-    const meta = [r.vertical, r.contactName, date].filter(Boolean).join(' · ');
-    return `<div class="call-item ${r.id===currentId?'active':''}" onclick="openCall('${r.id}')">
-      <button class="ci-del" title="Delete" onclick="event.stopPropagation();deleteCall('${r.id}')">&times;</button>
-      <div class="ci-name">${esc(name)}</div>
-      <div class="ci-meta">${esc(meta||'—')}</div>
+    const name = r.practiceName || '(unnamed client)';
+    const tag  = r.vertical ? `<span class="cc-tag">${esc(r.vertical)}</span>` : '';
+    const bits = [];
+    if(r.contactName) bits.push(esc(r.contactName));
+    if(r.callDate)    bits.push('Call: ' + esc(r.callDate));
+    if(r.updatedAt)   bits.push('Updated ' + esc(new Date(r.updatedAt).toLocaleDateString()));
+    return `<div class="client-card" onclick="openCall('${r.id}')">
+      <button class="cc-del" title="Delete" onclick="event.stopPropagation();deleteCall('${r.id}')">&times;</button>
+      <div class="cc-name">${esc(name)}</div>
+      <div class="cc-tags">${tag}</div>
+      <div class="cc-meta">${bits.join('<br>') || '&mdash;'}</div>
     </div>`;
   }).join('');
 }
@@ -646,8 +681,7 @@ async function openCall(id){
     hydrate(rec);
     currentId = rec.id;
     setBadge();
-    closeDrawer();
-    toast('Loaded');
+    showForm();
   }catch(e){ toast('Could not load client'); }
 }
 
@@ -668,11 +702,13 @@ async function saveCall(){
 }
 
 function newCall(){
-  if(!confirm('Start a new client? Unsaved changes will be lost.')) return;
+  // Warn only if we're already editing a form (avoid losing unsaved work).
+  const inForm = document.getElementById('formView').style.display !== 'none';
+  if(inForm && !confirm('Start a new client? Unsaved changes will be lost.')) return;
   render();
   currentId = null;
   setBadge();
-  toast('New client');
+  showForm();
 }
 
 async function deleteCall(id){
@@ -699,9 +735,6 @@ function setBadge(){
     b.classList.remove('editing');
   }
 }
-
-function openDrawer(){ loadList(); document.getElementById('drawer').classList.add('open'); }
-function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); }
 
 document.getElementById('pwd').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
 
