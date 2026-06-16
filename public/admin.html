@@ -47,6 +47,7 @@
         <h1>Korvo AI Admin</h1>
       </div>
       <div style="display:flex;gap:12px;align-items:center;">
+        <a href="/admin/discovery" style="color:rgba(255,255,255,.7);font-size:.85rem;">Discovery Intake</a>
         <a href="/" style="color:rgba(255,255,255,.7);font-size:.85rem;">← View Site</a>
         <button onclick="adminLogout()" class="btn btn-secondary" style="padding:8px 18px;font-size:.82rem;">Sign Out</button>
       </div>
@@ -55,6 +56,13 @@
 
   <div class="admin-body">
     <div class="container">
+
+      <!-- DISCOVERY CALLS -->
+      <div class="admin-card">
+        <h2>Discovery Call Intake</h2>
+        <p style="color:var(--text-muted);margin-bottom:18px;font-size:.95rem;">Fill out and save discovery-call records, and reopen past calls to edit them.</p>
+        <a href="/admin/discovery" class="btn btn-green">Open Discovery Intake</a>
+      </div>
 
       <!-- APPOINTMENTS -->
       <div class="admin-card">

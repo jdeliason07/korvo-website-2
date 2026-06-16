@@ -1,5 +1,6 @@
 node_modules/
 .env
 data/appointments.json
+data/discovery.json
 *.log
 .DS_Store

@@ -6,7 +6,15 @@ const path    = require('path');
 const fs      = require('fs');
 const { Resend } = require('resend');
 const resend  = new Resend(process.env.RESEND_API_KEY);
+const discoveryStore = require('./lib/discoveryStore');
 const ADMIN_PASS = process.env.ADMIN_PASS || 'korvo2026';
+
+// Simple admin auth — accepts the password via query (?adminKey=) or x-admin-key header.
+function requireAdmin(req, res, next) {
+  const key = req.query.adminKey || req.headers['x-admin-key'];
+  if (key !== ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
+  next();
+}
 
 const APPTS_FILE = path.join(__dirname, 'data', 'appointments.json');
 function getAppts() {
@@ -45,6 +53,7 @@ app.get('/about',      (req, res) => res.sendFile(path.join(__dirname, 'public',
 app.get('/pricing',    (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
 app.get('/book',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'book.html')));
 app.get('/admin',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('/admin/discovery', (req, res) => res.sendFile(path.join(__dirname, 'public', 'discovery.html')));
 
 // API: Contact / booking form
 app.post('/api/contact', async (req, res) => {
@@ -96,6 +105,58 @@ app.get('/api/appointments', (req, res) => {
   res.json(getAppts().appointments);
 });
 
+// API: Discovery calls (admin) — list / create / read / update / delete
+app.get('/api/discovery', requireAdmin, async (req, res) => {
+  try {
+    res.json(await discoveryStore.list());
+  } catch (err) {
+    console.error('Discovery list error:', err.message);
+    res.status(500).json({ error: 'Could not load discovery calls.' });
+  }
+});
+
+app.get('/api/discovery/:id', requireAdmin, async (req, res) => {
+  try {
+    const rec = await discoveryStore.get(req.params.id);
+    if (!rec) return res.status(404).json({ error: 'Not found' });
+    res.json(rec);
+  } catch (err) {
+    console.error('Discovery get error:', err.message);
+    res.status(500).json({ error: 'Could not load that call.' });
+  }
+});
+
+app.post('/api/discovery', requireAdmin, async (req, res) => {
+  try {
+    res.status(201).json(await discoveryStore.create(req.body || {}));
+  } catch (err) {
+    console.error('Discovery create error:', err.message);
+    res.status(500).json({ error: 'Could not save call.' });
+  }
+});
+
+app.put('/api/discovery/:id', requireAdmin, async (req, res) => {
+  try {
+    const rec = await discoveryStore.update(req.params.id, req.body || {});
+    if (!rec) return res.status(404).json({ error: 'Not found' });
+    res.json(rec);
+  } catch (err) {
+    console.error('Discovery update error:', err.message);
+    res.status(500).json({ error: 'Could not update call.' });
+  }
+});
+
+app.delete('/api/discovery/:id', requireAdmin, async (req, res) => {
+  try {
+    const ok = await discoveryStore.remove(req.params.id);
+    if (!ok) return res.status(404).json({ error: 'Not found' });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Discovery delete error:', err.message);
+    res.status(500).json({ error: 'Could not delete call.' });
+  }
+});
+
 // API: Newsletter
 app.post('/api/newsletter', (req, res) => {
   const { email } = req.body;
@@ -105,6 +166,10 @@ app.post('/api/newsletter', (req, res) => {
   console.log('Newsletter signup:', email);
   res.json({ success: true, message: "You're subscribed!" });
 });
+
+discoveryStore.init()
+  .then(() => console.log(`Discovery store ready (${discoveryStore.usingPostgres ? 'Postgres' : 'file'})`))
+  .catch((err) => console.error('Discovery store init failed:', err.message));
 
 app.listen(PORT, () => {
   console.log(`Korvo AI running at http://localhost:${PORT}`);
