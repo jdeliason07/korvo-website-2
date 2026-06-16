@@ -95,7 +95,7 @@ app.post('/api/contact', async (req, res) => {
     res.json({ success: true, message: "Thanks! We'll be in touch within one business day." });
   } catch (err) {
     console.error('Mail error:', err.message);
-    res.status(500).json({ error: 'Could not send message. Please email jack@korvo.ai directly.' });
+    res.status(500).json({ error: 'Could not send message. Please email hello@korvo.ai directly.' });
   }
 });
 
@@ -154,16 +154,6 @@ app.delete('/api/discovery/:id', requireAdmin, async (req, res) => {
     console.error('Discovery delete error:', err.message);
     res.status(500).json({ error: 'Could not delete call.' });
   }
-});
-
-// API: Newsletter
-app.post('/api/newsletter', (req, res) => {
-  const { email } = req.body;
-  if (!email || !email.includes('@')) {
-    return res.status(400).json({ error: 'A valid email is required.' });
-  }
-  console.log('Newsletter signup:', email);
-  res.json({ success: true, message: "You're subscribed!" });
 });
 
 discoveryStore.init()

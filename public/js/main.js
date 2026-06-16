@@ -61,38 +61,10 @@ contactForm?.addEventListener('submit', async e => {
       msg.classList.add('error');
     }
   } catch {
-    msg.textContent = 'Could not connect. Please email jack@korvo.ai directly.';
+    msg.textContent = 'Could not connect. Please email hello@korvo.ai directly.';
     msg.classList.add('error');
   }
 
   btn.disabled = false;
   btn.textContent = 'Send Message';
-});
-
-/* ── Newsletter form ───────────────────────────── */
-document.querySelectorAll('.newsletter-form').forEach(form => {
-  form.addEventListener('submit', async e => {
-    e.preventDefault();
-    const email = form.querySelector('input[type="email"]').value;
-    const btn = form.querySelector('button');
-    btn.disabled = true;
-    try {
-      const res = await fetch('/api/newsletter', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        btn.textContent = "You're in!";
-        form.querySelector('input').value = '';
-      } else {
-        btn.textContent = 'Try again';
-        btn.disabled = false;
-      }
-    } catch {
-      btn.textContent = 'Try again';
-      btn.disabled = false;
-    }
-  });
 });
