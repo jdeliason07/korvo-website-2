@@ -528,7 +528,7 @@ function METAorANS(rec,f){ return META_IDS.includes(f.id)? rec.meta[f.id] : rec.
 function copyMarkdown(){
   const md = toMarkdown(collect());
   if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(md).then(()=>toast('Copied — paste into Notion')).catch(()=>fallbackCopy(md));
+    navigator.clipboard.writeText(md).then(()=>toast('Markdown copied to clipboard')).catch(()=>fallbackCopy(md));
   } else fallbackCopy(md);
 }
 function fallbackCopy(text){
