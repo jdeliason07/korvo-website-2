@@ -52,9 +52,7 @@ async function verifyAndLoad() {
 
 function adminLogout() {
   ADMIN_KEY = '';
-  document.getElementById('adminPanel').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'block';
-  document.getElementById('adminKeyInput').value = '';
+  window.location.href = '/';
 }
 
 async function loadAppointments() {

@@ -624,7 +624,7 @@ function enterApp(list){
   showList();
 }
 
-function logout(){ sessionStorage.removeItem('korvoAdminKey'); location.reload(); }
+function logout(){ sessionStorage.removeItem('korvoAdminKey'); window.location.href='/'; }
 
 /* view switching */
 function showList(){
