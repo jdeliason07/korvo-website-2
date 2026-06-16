@@ -217,18 +217,18 @@
 
 <div class="actions">
   <span class="progress" id="progress">0 / 0 answered</span>
-  <span class="rec-badge" id="recBadge">New call</span>
+  <span class="rec-badge" id="recBadge">New client</span>
   <span class="spacer"></span>
   <button class="act primary" onclick="saveCall()">Save</button>
-  <button class="act" onclick="openDrawer()">Saved calls</button>
-  <button class="act ghost" onclick="newCall()">New call</button>
+  <button class="act" onclick="openDrawer()">Saved clients</button>
+  <button class="act ghost" onclick="newCall()">New client</button>
   <button class="act" onclick="copyMarkdown()">Copy MD</button>
   <button class="act" onclick="window.print()">Print / PDF</button>
   <button class="act ghost" onclick="logout()">Sign out</button>
 </div>
 
 <div class="warn"><div class="warn-inner">
-  <strong>Saved to the Korvo database.</strong> Hit <em>Save</em> to store this call. Each save becomes its own record — reopen and edit any past call from <em>Saved calls</em>.
+  <strong>Saved to the Korvo database.</strong> Hit <em>Save</em> to store this client. Each save is its own client record — reopen and edit any client from <em>Saved clients</em>.
 </div></div>
 
 <div class="container" id="form"><!-- rendered from SCHEMA --></div>
@@ -240,7 +240,7 @@
 <div class="drawer" id="drawer">
   <div class="drawer-scrim" onclick="closeDrawer()"></div>
   <div class="drawer-panel">
-    <div class="drawer-head"><span>Saved Calls</span><button class="drawer-close" onclick="closeDrawer()">&times;</button></div>
+    <div class="drawer-head"><span>Saved Clients</span><button class="drawer-close" onclick="closeDrawer()">&times;</button></div>
     <div class="drawer-list" id="drawerList"></div>
   </div>
 </div>
@@ -460,7 +460,7 @@ function readField(f){
       return o;
     }).filter(o=> o.name || o.length);
   }
-  if(f.type==='number'){ return node.querySelector('input').value; }
+  if(f.type==='number'){ return node.value; }
   return node.value;
 }
 
@@ -483,7 +483,7 @@ function setField(f, v){
   if(f.type==='repeater'){
     node.innerHTML=''; (Array.isArray(v)?v:[]).forEach(r=>node.insertAdjacentHTML('beforeend',renderRepRow(f.id,f.columns,r))); return;
   }
-  if(f.type==='number'){ node.querySelector('input').value = v; return; }
+  if(f.type==='number'){ node.value = v; return; }
   node.value = v;
 }
 function hydrate(rec){
@@ -591,13 +591,16 @@ async function doLogin(){
   err.textContent='';
   if(!pwd){ err.textContent='Enter the admin password.'; return; }
   ADMIN_KEY = pwd;
+  let list;
   try{
     const res = await fetch(API, {headers:authHeaders()});
     if(res.status===401){ err.textContent='Incorrect password.'; ADMIN_KEY=''; return; }
     if(!res.ok){ err.textContent='Server error ('+res.status+').'; ADMIN_KEY=''; return; }
-    sessionStorage.setItem('korvoAdminKey', ADMIN_KEY);
-    enterApp(await res.json());
-  }catch(e){ err.textContent='Could not reach the server.'; ADMIN_KEY=''; }
+    list = await res.json();
+  }catch(e){ err.textContent='Could not reach the server.'; ADMIN_KEY=''; return; }
+  // Auth succeeded — persist the key BEFORE any rendering so a UI error can't log us out.
+  sessionStorage.setItem('korvoAdminKey', ADMIN_KEY);
+  enterApp(list);
 }
 
 function enterApp(list){
@@ -621,7 +624,7 @@ async function loadList(){
 
 function renderList(list){
   const c = document.getElementById('drawerList');
-  if(!list || !list.length){ c.innerHTML='<div class="drawer-empty">No saved calls yet.</div>'; return; }
+  if(!list || !list.length){ c.innerHTML='<div class="drawer-empty">No saved clients yet.</div>'; return; }
   c.innerHTML = list.map(r=>{
     const name = r.practiceName || '(unnamed practice)';
     const date = r.callDate || (r.updatedAt? new Date(r.updatedAt).toLocaleDateString() : '');
@@ -638,14 +641,14 @@ async function openCall(id){
   try{
     const res = await fetch(API+'/'+id, {headers:authHeaders()});
     if(res.status===401){ logout(); return; }
-    if(!res.ok){ toast('Could not load call'); return; }
+    if(!res.ok){ toast('Could not load client'); return; }
     const rec = await res.json();
     hydrate(rec);
     currentId = rec.id;
     setBadge();
     closeDrawer();
     toast('Loaded');
-  }catch(e){ toast('Could not load call'); }
+  }catch(e){ toast('Could not load client'); }
 }
 
 async function saveCall(){
@@ -665,15 +668,15 @@ async function saveCall(){
 }
 
 function newCall(){
-  if(!confirm('Start a new call? Unsaved changes will be lost.')) return;
+  if(!confirm('Start a new client? Unsaved changes will be lost.')) return;
   render();
   currentId = null;
   setBadge();
-  toast('New call');
+  toast('New client');
 }
 
 async function deleteCall(id){
-  if(!confirm('Delete this saved call? This cannot be undone.')) return;
+  if(!confirm('Delete this saved client? This cannot be undone.')) return;
   try{
     const res = await fetch(API+'/'+id, {method:'DELETE', headers:authHeaders()});
     if(res.status===401){ logout(); return; }
@@ -689,10 +692,10 @@ function setBadge(){
   if(!b) return;
   if(currentId){
     const name = (readField(fieldById('practiceName'))||'').trim();
-    b.textContent = 'Editing: ' + (name || 'saved call');
+    b.textContent = 'Editing: ' + (name || 'saved client');
     b.classList.add('editing');
   } else {
-    b.textContent = 'New call';
+    b.textContent = 'New client';
     b.classList.remove('editing');
   }
 }
