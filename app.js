@@ -53,7 +53,8 @@ app.get('/about',      (req, res) => res.sendFile(path.join(__dirname, 'public',
 app.get('/pricing',    (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
 app.get('/book',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'book.html')));
 app.get('/admin',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-app.get('/admin/discovery', (req, res) => res.sendFile(path.join(__dirname, 'public', 'discovery.html')));
+// Old separate intake URL now folds into the single admin page.
+app.get('/admin/discovery', (req, res) => res.redirect('/admin'));
 
 // API: Contact / booking form
 app.post('/api/contact', async (req, res) => {
@@ -99,9 +100,7 @@ app.post('/api/contact', async (req, res) => {
 });
 
 // API: Appointments (admin)
-app.get('/api/appointments', (req, res) => {
-  const { adminKey } = req.query;
-  if (adminKey !== ADMIN_PASS) return res.status(401).json({ error: 'Unauthorized' });
+app.get('/api/appointments', requireAdmin, (req, res) => {
   res.json(getAppts().appointments);
 });
 

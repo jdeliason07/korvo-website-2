@@ -1,95 +1,802 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin — Korvo AI</title>
-  <meta name="robots" content="noindex,nofollow" />
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="/css/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Korvo AI — Discovery Call Intake</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<!--
+  Korvo AI — Discovery Call Intake (admin)
+  Data-driven from the SCHEMA array. collect() -> one record; hydrate(record) round-trips.
+  Persistence is via the admin API: /api/discovery (list/create) and /api/discovery/:id (read/update/delete).
+-->
+<style>
+  :root{
+    --pine:#1A4A2E; --pine-deep:#132f1e; --terracotta:#B85C3A; --clay:#C96B47;
+    --sage:#5E8B6F; --cream:#F0EBE2; --linen:#E8DFD0; --paper:#faf6ed;
+    --ink:#1e1e1e; --ink-mid:#4a4542; --ink-soft:#7a7370; --rule:#cec5b8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);font-family:'Lato',sans-serif;color:var(--ink);min-height:100vh;}
+
+  /* HEADER */
+  header{background:var(--pine);padding:20px 40px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .logo{display:flex;align-items:center;gap:13px;}
+  .logo-mark{width:34px;height:34px;flex-shrink:0;}
+  .logo-text{font-family:'Playfair Display',serif;font-weight:800;font-size:20px;color:var(--cream);letter-spacing:-.01em;line-height:1;}
+  .logo-text em{font-style:italic;font-weight:400;color:var(--terracotta);}
+  .logo-sub{font-size:10px;font-weight:300;color:var(--sage);letter-spacing:.18em;text-transform:uppercase;margin-top:3px;}
+  .header-right{font-size:11px;font-weight:300;color:var(--sage);letter-spacing:.12em;text-transform:uppercase;}
+  .header-right a{color:var(--cream);text-decoration:none;}
+
+  /* HERO */
+  .hero{background:var(--pine);padding:40px 40px 48px;text-align:center;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border:1px solid rgba(94,139,111,.12);border-radius:50%;}
+  .hero::after{content:'';position:absolute;bottom:-30px;left:-30px;width:140px;height:140px;border:1px solid rgba(184,92,58,.1);border-radius:50%;}
+  .hero-eyebrow{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--terracotta);margin-bottom:14px;font-weight:700;}
+  .hero h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:800;color:var(--cream);line-height:1.12;max-width:560px;margin:0 auto 12px;letter-spacing:-.02em;}
+  .hero h1 em{font-style:italic;font-weight:400;color:var(--sage);}
+  .hero p{font-size:14px;font-weight:300;color:rgba(240,235,226,.65);max-width:440px;margin:0 auto;line-height:1.7;}
+
+  /* ACTION BAR */
+  .actions{position:sticky;top:0;z-index:50;background:var(--linen);border-bottom:1px solid var(--rule);padding:11px 24px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .actions .spacer{flex:1;}
+  .progress{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--pine);background:rgba(94,139,111,.14);padding:6px 12px;border-radius:3px;white-space:nowrap;}
+  .rec-badge{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--ink-soft);background:#fff;border:1px solid var(--rule);border-radius:3px;padding:6px 12px;white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis;}
+  .rec-badge.editing{color:var(--pine);border-color:var(--sage);background:rgba(94,139,111,.12);}
+  button.act{font-family:'Lato',sans-serif;font-size:12px;font-weight:700;letter-spacing:.04em;cursor:pointer;border-radius:3px;padding:8px 14px;border:1px solid var(--sage);background:#fff;color:var(--pine);transition:background .15s,color .15s,border-color .15s;}
+  button.act:hover{background:var(--pine);color:var(--cream);border-color:var(--pine);}
+  button.act.primary{background:var(--terracotta);border-color:var(--terracotta);color:var(--cream);}
+  button.act.primary:hover{background:var(--clay);border-color:var(--clay);}
+  button.act.ghost{border-color:var(--rule);color:var(--ink-soft);}
+  button.act.ghost:hover{background:var(--ink-soft);color:var(--cream);border-color:var(--ink-soft);}
+
+  /* SAVE WARNING */
+  .warn{max-width:880px;margin:18px auto 0;padding:0 24px;}
+  .warn-inner{font-size:12px;font-weight:300;color:var(--ink-mid);line-height:1.6;padding:11px 15px;background:rgba(94,139,111,.1);border-left:3px solid var(--sage);border-radius:3px;}
+  .warn-inner strong{color:var(--pine);font-weight:700;}
+
+  /* LAYOUT */
+  .container{max-width:880px;margin:0 auto;padding:24px 24px 72px;display:flex;flex-direction:column;gap:20px;}
+
+  .card{background:#fff;border:1px solid var(--linen);border-radius:4px;overflow:hidden;}
+  .card-head{background:var(--linen);padding:15px 22px;display:flex;align-items:baseline;gap:12px;border-bottom:1px solid #ddd5c8;}
+  .card-num{font-family:'Playfair Display',serif;font-style:italic;font-size:18px;color:var(--terracotta);line-height:1;flex-shrink:0;}
+  .card-titles{display:flex;flex-direction:column;gap:3px;}
+  .card-title{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--pine);}
+  .card-sub{font-size:12px;font-weight:300;color:var(--ink-soft);line-height:1.4;}
+  .card-body{padding:22px;display:flex;flex-direction:column;gap:18px;}
+
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field > label{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--ink-mid);line-height:1.4;}
+  .field .hint{font-size:11px;font-weight:300;color:var(--ink-soft);margin-top:-3px;line-height:1.4;}
+
+  .inp-wrap{position:relative;display:flex;align-items:center;}
+  .inp-wrap .pre,.inp-wrap .suf{position:absolute;font-size:13px;color:var(--ink-soft);pointer-events:none;}
+  .inp-wrap .pre{left:12px;} .inp-wrap .suf{right:12px;}
+  .inp-wrap.has-pre input{padding-left:25px;} .inp-wrap.has-suf input{padding-right:32px;}
+
+  input[type=text],input[type=number],input[type=date],input[type=password],textarea,select{
+    width:100%;padding:10px 12px;border:1px solid var(--linen);border-radius:3px;
+    font-family:'Lato',sans-serif;font-size:15px;color:var(--ink);background:var(--cream);
+    outline:none;transition:border-color .2s,background .2s;}
+  input:focus,textarea:focus,select:focus{border-color:var(--sage);background:#fff;}
+  input[type=number]{-moz-appearance:textfield;}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  textarea{resize:vertical;min-height:62px;line-height:1.55;}
+  select{cursor:pointer;appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235E8B6F' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;}
+
+  /* OPTION PILLS */
+  .opts{display:flex;flex-wrap:wrap;gap:8px;}
+  .opt{position:relative;cursor:pointer;user-select:none;}
+  .opt input{position:absolute;opacity:0;width:0;height:0;}
+  .opt span{display:inline-block;font-size:13px;font-weight:400;color:var(--ink-mid);background:var(--cream);
+    border:1px solid var(--linen);border-radius:3px;padding:8px 14px;transition:all .15s;line-height:1.2;}
+  .opt:hover span{border-color:var(--sage);}
+  .opt input:checked + span{background:var(--pine);border-color:var(--pine);color:var(--cream);font-weight:700;}
+  .opt.check input:checked + span{background:var(--sage);border-color:var(--sage);}
+  .opt.check span::before{content:'\2713\00a0\00a0';opacity:.45;}
+  .opt.check input:checked + span::before{opacity:1;}
+
+  /* REPEATER */
+  .rep{display:flex;flex-direction:column;gap:8px;}
+  .rep-row{display:grid;grid-template-columns:1fr 110px auto auto;gap:8px;align-items:center;}
+  .rep-row input[type=text]{font-size:14px;padding:8px 10px;}
+  .rep-toggle{display:flex;align-items:center;}
+  .rep-toggle .opt span{padding:7px 11px;font-size:12px;white-space:nowrap;}
+  .rep-del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:20px;line-height:1;padding:4px 8px;border-radius:3px;transition:color .15s,background .15s;}
+  .rep-del:hover{color:var(--terracotta);background:rgba(184,92,58,.08);}
+  .rep-add{align-self:flex-start;font-size:12px;font-weight:700;color:var(--pine);background:none;border:1px dashed var(--sage);border-radius:3px;padding:8px 14px;cursor:pointer;transition:background .15s;}
+  .rep-add:hover{background:rgba(94,139,111,.08);}
+  .rep-legend{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);display:grid;grid-template-columns:1fr 110px auto auto;gap:8px;padding:0 2px;}
+  .rep-legend span:nth-child(3){justify-self:center;}
+
+  footer{background:var(--pine);text-align:center;padding:22px;font-size:11px;font-weight:300;color:var(--sage);letter-spacing:.1em;}
+  footer strong{color:var(--cream);font-weight:700;}
+
+  /* toast */
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--pine);color:var(--cream);
+    font-size:13px;font-weight:700;letter-spacing:.03em;padding:12px 22px;border-radius:4px;box-shadow:0 8px 30px rgba(0,0,0,.25);
+    opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:400;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* LOGIN */
+  .login{position:fixed;inset:0;background:var(--pine);display:flex;align-items:center;justify-content:center;z-index:300;padding:24px;}
+  .login-card{background:var(--paper);border-radius:8px;padding:36px 32px;max-width:360px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+  .login-card .logo-mark{width:44px;height:44px;margin:0 auto 14px;}
+  .login-card h2{font-family:'Playfair Display',serif;color:var(--pine);font-size:22px;margin-bottom:6px;}
+  .login-card p{font-size:12px;color:var(--ink-soft);margin-bottom:20px;}
+  .login-card input{margin-bottom:14px;text-align:center;}
+  .login-card .act{width:100%;justify-content:center;display:block;}
+  .login-err{color:var(--terracotta);font-size:12px;font-weight:700;margin-top:12px;min-height:16px;}
+
+  /* CLIENT LIST VIEW */
+  .list-hero{background:var(--pine);padding:44px clamp(20px,6vw,56px);position:relative;overflow:hidden;}
+  .list-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border:1px solid rgba(94,139,111,.12);border-radius:50%;}
+  .list-hero-inner{max-width:1000px;margin:0 auto;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;position:relative;z-index:1;}
+  .list-title{font-family:'Playfair Display',serif;font-size:clamp(34px,5vw,48px);font-weight:800;color:var(--cream);line-height:1;letter-spacing:-.02em;}
+  .list-count{font-size:13px;color:rgba(240,235,226,.6);margin-top:10px;}
+  .list-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .list-wrap{max-width:1000px;margin:0 auto;padding:32px clamp(20px,6vw,56px) 72px;}
+  .panel{margin-bottom:44px;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+  .panel-title{font-family:'Playfair Display',serif;font-weight:700;font-size:26px;color:var(--pine);letter-spacing:-.01em;}
+  .panel-count{font-family:'Lato',sans-serif;font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.04em;}
+  .table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--linen);border-radius:6px;}
+  .appt-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .appt-table th{background:var(--linen);color:var(--pine);text-transform:uppercase;font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:11px 12px;text-align:left;white-space:nowrap;}
+  .appt-table td{padding:11px 12px;border-top:1px solid var(--linen);color:var(--ink-mid);vertical-align:top;}
+  .appt-table td a{color:var(--pine);font-weight:700;text-decoration:none;}
+  .appt-table .td-note{color:var(--ink-soft);text-align:center;padding:24px 12px;}
+  .appt-table .td-msg{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .client-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;}
+  .client-card{position:relative;background:#fff;border:1px solid var(--linen);border-radius:6px;padding:22px 22px 20px;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s;}
+  .client-card:hover{border-color:var(--sage);box-shadow:0 8px 24px rgba(26,74,46,.1);transform:translateY(-2px);}
+  .client-card .cc-name{font-family:'Playfair Display',serif;font-weight:700;font-size:20px;color:var(--pine);line-height:1.15;margin-bottom:10px;padding-right:26px;}
+  .client-card .cc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;min-height:4px;}
+  .client-card .cc-tag{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--pine);background:rgba(94,139,111,.14);border-radius:3px;padding:4px 8px;}
+  .client-card .cc-meta{font-size:12.5px;color:var(--ink-soft);line-height:1.7;}
+  .client-card .cc-del{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--ink-soft);font-size:20px;cursor:pointer;padding:2px 7px;border-radius:3px;line-height:1;}
+  .client-card .cc-del:hover{color:var(--terracotta);background:rgba(184,92,58,.1);}
+  .client-empty{grid-column:1/-1;text-align:center;color:var(--ink-soft);padding:64px 20px;}
+  .client-empty .ce-title{font-family:'Playfair Display',serif;font-size:24px;color:var(--pine);margin-bottom:8px;}
+
+  @media (max-width:680px){
+    .list-hero-inner{align-items:flex-start;}
+    .client-grid{grid-template-columns:1fr;}
+    header{padding:16px 20px;} .header-right{display:none;}
+    .hero{padding:32px 20px 40px;} .hero h1{font-size:26px;}
+    .container{padding:18px 14px 60px;}
+    .card-body{padding:18px;}
+    .rep-row,.rep-legend{grid-template-columns:1fr;gap:6px;}
+    .rep-legend{display:none;}
+    .rep-row{padding:12px;border:1px solid var(--linen);border-radius:4px;}
+    .rep-del{justify-self:end;}
+  }
+  @media print{
+    .actions,.warn,#toast,.rep-add,.rep-del,.drawer,.login{display:none!important;}
+    body{background:#fff;} .card{break-inside:avoid;border-color:#ccc;}
+    input,textarea,select{background:#fff!important;border-color:#ccc!important;}
+  }
+</style>
 </head>
-<body style="background:var(--cream);">
+<body>
 
-<!-- LOGIN SCREEN -->
-<div id="loginScreen">
-  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;">
-    <div class="admin-login">
-      <div style="text-align:center;margin-bottom:24px;">
-        <svg width="44" height="44" viewBox="0 0 100 100" style="margin:0 auto 12px;">
-          <polygon points="50,2 98,50 50,50" fill="#2d6b4f"/>
-          <polygon points="50,2 2,50 50,50" fill="#4a9970"/>
-          <polygon points="2,50 50,98 50,50" fill="#1a5c3a"/>
-          <polygon points="98,50 50,98 50,50" fill="#b85c45"/>
-        </svg>
-        <h2>Korvo AI Admin</h2>
-      </div>
-      <div class="form-group">
-        <label for="adminKeyInput">Admin Password</label>
-        <input type="password" id="adminKeyInput" placeholder="Enter admin password" />
-      </div>
-      <button onclick="adminLogin()" class="btn btn-green" style="width:100%;">Sign In</button>
-      <div id="loginError" style="color:#dc3545;font-size:.88rem;margin-top:12px;display:none;">Incorrect password.</div>
-    </div>
+<!-- LOGIN GATE -->
+<div class="login" id="login">
+  <div class="login-card">
+    <svg class="logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,8 50,50 10,50" fill="#5e8b6f"/>
+      <polygon points="50,8 90,50 50,50" fill="#1a4a2e"/>
+      <polygon points="10,50 50,50 50,92" fill="#1a4a2e"/>
+      <polygon points="50,50 90,50 50,92" fill="#b85c3a"/>
+      <line x1="50" y1="8" x2="50" y2="92" stroke="#f0ebe2" stroke-width="5"/>
+      <line x1="10" y1="50" x2="90" y2="50" stroke="#f0ebe2" stroke-width="5"/>
+    </svg>
+    <h2>Discovery Intake</h2>
+    <p>Admin access only</p>
+    <input type="password" id="pwd" placeholder="Admin password" autocomplete="current-password">
+    <button class="act primary" onclick="doLogin()">Sign in</button>
+    <div class="login-err" id="loginErr"></div>
   </div>
 </div>
 
-<!-- ADMIN PANEL -->
-<div id="adminPanel" style="display:none;">
-  <div class="admin-bar">
-    <div class="container">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <svg width="28" height="28" viewBox="0 0 100 100">
-          <polygon points="50,2 98,50 50,50" fill="#2d6b4f"/>
-          <polygon points="50,2 2,50 50,50" fill="#fff"/>
-          <polygon points="2,50 50,98 50,50" fill="#fff"/>
-          <polygon points="98,50 50,98 50,50" fill="#b85c45"/>
-        </svg>
-        <h1>Korvo AI Admin</h1>
+<!-- APP (hidden until authenticated) -->
+<div id="app" style="display:none;">
+
+<header>
+  <div class="logo">
+    <svg class="logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="50,8 50,50 10,50" fill="#5e8b6f"/>
+      <polygon points="50,8 90,50 50,50" fill="#1a4a2e"/>
+      <polygon points="10,50 50,50 50,92" fill="#1a4a2e"/>
+      <polygon points="50,50 90,50 50,92" fill="#b85c3a"/>
+      <line x1="50" y1="8" x2="50" y2="92" stroke="#f0ebe2" stroke-width="5"/>
+      <line x1="10" y1="50" x2="90" y2="50" stroke="#f0ebe2" stroke-width="5"/>
+    </svg>
+    <div>
+      <div class="logo-text">Korvo <em>AI</em></div>
+      <div class="logo-sub">Admin</div>
+    </div>
+  </div>
+  <div class="header-right"><a href="/">View site &rarr;</a></div>
+</header>
+
+<!-- LIST VIEW (landing page after login) -->
+<div id="listView">
+  <div class="list-hero">
+    <div class="list-hero-inner">
+      <div>
+        <div class="hero-eyebrow">Korvo AI</div>
+        <h1 class="list-title">Admin</h1>
+        <p class="list-count">Consultation requests &amp; discovery intake</p>
       </div>
-      <div style="display:flex;gap:12px;align-items:center;">
-        <a href="/admin/discovery" style="color:rgba(255,255,255,.7);font-size:.85rem;">Discovery Intake</a>
-        <a href="/" style="color:rgba(255,255,255,.7);font-size:.85rem;">← View Site</a>
-        <button onclick="adminLogout()" class="btn btn-secondary" style="padding:8px 18px;font-size:.82rem;">Sign Out</button>
+      <div class="list-actions">
+        <button class="act ghost" onclick="logout()">Sign out</button>
       </div>
     </div>
   </div>
+  <div class="list-wrap">
 
-  <div class="admin-body">
-    <div class="container">
-
-      <!-- DISCOVERY CALLS -->
-      <div class="admin-card">
-        <h2>Discovery Call Intake</h2>
-        <p style="color:var(--text-muted);margin-bottom:18px;font-size:.95rem;">Fill out and save discovery-call records, and reopen past calls to edit them.</p>
-        <a href="/admin/discovery" class="btn btn-green">Open Discovery Intake</a>
+    <!-- CONSULTATION REQUESTS -->
+    <section class="panel">
+      <div class="panel-head"><h2 class="panel-title">Consultation Requests</h2></div>
+      <div class="table-wrap">
+        <table class="appt-table">
+          <thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Service</th><th>Message</th></tr></thead>
+          <tbody id="apptBody"><tr><td colspan="6" class="td-note">Loading…</td></tr></tbody>
+        </table>
       </div>
+    </section>
 
-      <!-- APPOINTMENTS -->
-      <div class="admin-card">
-        <h2>Consultation Requests</h2>
-        <div style="overflow-x:auto;">
-          <table class="appt-table" id="apptTable">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Service</th>
-                <th>Message</th>
-              </tr>
-            </thead>
-            <tbody id="apptBody">
-              <tr><td colspan="6" style="color:var(--text-muted);">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
+    <!-- DISCOVERY INTAKE / CLIENTS -->
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Clients <span class="panel-count" id="clientCount"></span></h2>
+        <button class="act primary" onclick="newCall()">+ New client</button>
       </div>
+      <div class="client-grid" id="clientGrid"></div>
+    </section>
 
-    </div>
   </div>
 </div>
 
-<script src="/js/admin.js"></script>
+<!-- FORM VIEW (one client's intake) -->
+<div id="formView" style="display:none;">
+  <div class="actions">
+    <button class="act" onclick="showList()">&larr; Clients</button>
+    <span class="progress" id="progress">0 / 0 answered</span>
+    <span class="rec-badge" id="recBadge">New client</span>
+    <span class="spacer"></span>
+    <button class="act primary" onclick="saveCall()">Save</button>
+    <button class="act ghost" onclick="newCall()">New client</button>
+    <button class="act" onclick="copyMarkdown()">Copy MD</button>
+    <button class="act" onclick="window.print()">Print / PDF</button>
+    <button class="act ghost" onclick="logout()">Sign out</button>
+  </div>
+
+  <div class="warn"><div class="warn-inner">
+    <strong>Saved to the Korvo database.</strong> Hit <em>Save</em> to store this client. It will appear in your client list — reopen and edit it anytime.
+  </div></div>
+
+  <div class="container" id="form"><!-- rendered from SCHEMA --></div>
+</div>
+
+<footer><strong>Korvo AI</strong> &nbsp;·&nbsp; korvo.ai</footer>
+</div><!-- /#app -->
+
+<div id="toast"></div>
+
+<script>
+/* ───────────────────────── SCHEMA (single source of truth) ───────────────────────── */
+const SCHEMA = [
+  { id:'meta', num:'·', title:'Call Details', sub:'Who, what, when.', fields:[
+    { id:'practiceName', type:'text', label:'Practice name' },
+    { id:'contactName',  type:'text', label:'Who you’re talking to (name + role)' },
+    { id:'vertical',     type:'select', label:'Vertical', options:['Podiatry','Dental','HVAC','Plumbing','Electrical','Real Estate','Insurance','Other'], default:'Podiatry' },
+    { id:'verticalOther', type:'text', label:'Which other vertical?', revealedBy:{field:'vertical',equals:'Other'} },
+    { id:'callDate',     type:'date', label:'Date of call' },
+    { id:'interviewer',  type:'text', label:'Interviewer', default:'Jack' },
+  ]},
+
+  { id:'baseline', num:'i', title:'Baseline Numbers', sub:'Get these first — the case study lives or dies on them.', fields:[
+    { id:'callVolume',       type:'number', label:'Rough monthly call volume' },
+    { id:'afterHoursCalls',  type:'number', label:'Est. after-hours / unanswered calls per month' },
+    { id:'afterHoursHandling', type:'radio', label:'How after-hours calls are handled today', options:['Voicemail','Answering service','Nothing','Other'] },
+    { id:'noShowRate',       type:'number', suffix:'%', label:'Current no-show rate (a guess is fine)' },
+    { id:'visitValue',       type:'number', prefix:'$', label:'Average value of a visit' },
+    { id:'newPatientValue',  type:'number', prefix:'$', label:'Average value of a new patient' },
+    { id:'doctorCount',      type:'number', label:'How many doctors see patients?', hint:'Count any PAs/NPs too. Each provider is a separate calendar the agent has to book into — it’s what decides how complex the scheduling logic is.' },
+    { id:'successMetric',    type:'textarea', label:'Agreed success metric — say it out loud and lock it', default:'5+ captured after-hours appointments within 90 days → then we discuss a paid retainer.' },
+  ]},
+
+  { id:'basics', num:'ii', title:'The Basics the Agent Needs', sub:'What the agent says and knows.', fields:[
+    { id:'greeting',   type:'text', label:'How the front desk answers the phone today' },
+    { id:'doctorName', type:'text', label:'What the agent should call the doctor', hint:'e.g., “Dr. ___”' },
+    { id:'address',    type:'textarea', label:'Address(es)' },
+    { id:'directions', type:'textarea', label:'Parking / directions notes' },
+    { id:'hours',      type:'textarea', label:'Hours each day', placeholder:'Mon–Thu 8–5, Fri 8–12, closed Sat/Sun' },
+    { id:'closures',   type:'textarea', label:'Regular closures (lunch, half-days, holidays)' },
+    { id:'website',    type:'text', label:'Website' },
+    { id:'routeWhen',  type:'checkgroup', label:'When should calls roll to the AI?', options:['After closing','When the line is busy','When no one answers'], default:['After closing'] },
+    { id:'languages',  type:'checkgroup', label:'Languages patients call in', options:['English','Spanish','Other'], default:['English'] },
+    { id:'languagesOther', type:'text', label:'Which other language?', revealedBy:{field:'languages',includes:'Other'} },
+  ]},
+
+  { id:'scheduling', num:'iii', title:'Scheduling — This Decides the Build', sub:'Get the exact software name. You research the API yourself afterward.', fields:[
+    { id:'ehrName',       type:'text', label:'EHR / scheduling software name (exact brand)', hint:'e.g., Modernizing Medicine, eClinicalWorks, NextGen' },
+    { id:'onlineBooking', type:'radio', label:'Does it offer online patient self-scheduling today?', options:['Yes','No','Unsure'] },
+    { id:'appointmentTypes', type:'repeater', label:'Appointment types they book',
+      columns:[{key:'name',type:'text',ph:'Type'},{key:'length',type:'text',ph:'Approx. length'},{key:'aiBookable',type:'check',ph:'AI may book'}],
+      default:[
+        {name:'New patient',length:'',aiBookable:true},
+        {name:'Follow-up',length:'',aiBookable:true},
+        {name:'Routine / nail care',length:'',aiBookable:true},
+        {name:'Wound care',length:'',aiBookable:false},
+        {name:'Ingrown toenail',length:'',aiBookable:true},
+        {name:'Orthotics fitting',length:'',aiBookable:true},
+        {name:'Heel / foot pain',length:'',aiBookable:true},
+        {name:'Post-op check',length:'',aiBookable:false},
+      ]},
+    { id:'providerSchedule', type:'textarea', label:'Doctor’s working days/hours, lunch, blocked times' },
+    { id:'bookingWindow',    type:'text', label:'How far out can patients book?' },
+    { id:'sameDay',          type:'radio', label:'Same-day appointments allowed?', options:['Yes','No'] },
+  ]},
+
+  { id:'intake', num:'iv', title:'What the Agent Collects', sub:'From each caller.', fields:[
+    { id:'newVsEstablished',  type:'textarea', label:'New vs. established patient — handled differently how?' },
+    { id:'collectFields',     type:'checkgroup', label:'Info to capture for a new patient', options:['Name','Date of birth','Callback number','Reason for visit','Insurance'], default:['Name','Date of birth','Callback number','Reason for visit','Insurance'] },
+    { id:'insuranceAccepted', type:'textarea', label:'Insurance plans accepted' },
+    { id:'insuranceNotAccepted', type:'textarea', label:'Insurance NOT accepted' },
+    { id:'medicare',          type:'textarea', label:'How Medicare is handled' },
+    { id:'verifyInsurance',   type:'radio', label:'Verify insurance before booking?', options:['Yes','No'] },
+    { id:'referralRequired',  type:'textarea', label:'Do any visits require a referral first?' },
+  ]},
+
+  { id:'safety', num:'v', title:'Safety + Rules', sub:'Non-negotiable for a medical line.', fields:[
+    { id:'noMedicalAdvice', type:'check', label:'Confirmed: the agent gives NO medical advice, ever' },
+    { id:'emergencyScript', type:'textarea', label:'Emergency script wording', default:'If this is a medical emergency, please hang up and call 911 or go to your nearest emergency room.' },
+    { id:'onCallNumber',    type:'text', label:'On-call doctor / after-hours number for real medical issues' },
+    { id:'refills',         type:'textarea', label:'Prescription refills — handling', default:'Route to front-desk staff. Agent never handles refills.' },
+    { id:'recordCalls',     type:'radio', label:'OK to record calls?', options:['Yes','No'], hint:'You’ll want recordings as case-study proof.' },
+    { id:'discloseAI',      type:'check', label:'Confirmed: agent states it’s an AI assistant at the start of the call' },
+  ]},
+
+  { id:'faq', num:'vi', title:'Common Questions', sub:'The agent should be able to answer these.', fields:[
+    { id:'prices',       type:'textarea', label:'Cash prices for common services' },
+    { id:'bringToVisit', type:'textarea', label:'What to bring to a first visit' },
+    { id:'cancelPolicy', type:'textarea', label:'Cancellation / reschedule policy' },
+    { id:'telehealth',   type:'textarea', label:'Telehealth (virtual visits) offered? For what?' },
+    { id:'otherFaq',     type:'textarea', label:'Other common questions' },
+  ]},
+
+  { id:'handoff', num:'vii', title:'Where the Booking Goes', sub:'Plus the fallback.', fields:[
+    { id:'pointPerson',     type:'text', label:'Front-desk point person' },
+    { id:'sendRequestsTo',  type:'text', label:'Where captured requests are sent (email/SMS — copy to you)', default:'hello@korvo.ai' },
+    { id:'morningRoutine',  type:'textarea', label:'Morning routine: who reviews overnight requests and books them', default:'Korvo reviews each morning and enters into the EHR. Practice does nothing.' },
+    { id:'cantHelpFallback',type:'textarea', label:'If the agent can’t help, what should it do?', default:'Take a message and promise a callback by a set time.' },
+  ]},
+
+  { id:'sms', num:'viii', title:'Text-Message Confirmations', sub:'Current state of confirmation texts.', fields:[
+    { id:'smsCurrent', type:'radio', label:'Is SMS confirmation deployed and effective right now?', options:['Yes','No','Partially'] },
+    { id:'smsNote',    type:'textarea', label:'Notes (optional)' },
+  ]},
+
+  { id:'setup', num:'ix', title:'Setup Logistics & Dependencies', sub:'The things that can stall the build.', fields:[
+    { id:'phoneCarrier', type:'text', label:'Phone system / carrier', hint:'Needed for call forwarding.' },
+    { id:'canForward',   type:'radio', label:'Can it conditionally forward after-hours calls?', options:['Yes','No','Unsure'] },
+    { id:'korvoLogin',   type:'radio', label:'Will the practice create an EHR login for Korvo at setup?', options:['Yes','No'] },
+    { id:'hipaaBasics',  type:'checkgroup', label:'HIPAA basics in place', options:['BAA signed','Named Korvo login','Confidentiality / PHI policy'] },
+    { id:'nextSteps',    type:'textarea', label:'Open notes / next steps' },
+  ]},
+];
+
+const SCHEMA_VERSION = 1;
+const META_IDS = SCHEMA.find(s=>s.id==='meta').fields.map(f=>f.id);
+
+/* ───────────────────────── RENDER ───────────────────────── */
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const root = document.getElementById('form');
+
+function renderField(f){
+  let inner = '';
+  if(f.type==='text' || f.type==='date'){
+    inner = `<input type="${f.type}" data-field="${f.id}" ${f.placeholder?`placeholder="${esc(f.placeholder)}"`:''} value="${f.default?esc(f.default):''}">`;
+  } else if(f.type==='number'){
+    const wrapCls = (f.prefix?'has-pre ':'') + (f.suffix?'has-suf ':'');
+    inner = `<div class="inp-wrap ${wrapCls}">${f.prefix?`<span class="pre">${esc(f.prefix)}</span>`:''}<input type="number" data-field="${f.id}">${f.suffix?`<span class="suf">${esc(f.suffix)}</span>`:''}</div>`;
+  } else if(f.type==='textarea'){
+    inner = `<textarea data-field="${f.id}" ${f.placeholder?`placeholder="${esc(f.placeholder)}"`:''}>${f.default?esc(f.default):''}</textarea>`;
+  } else if(f.type==='select'){
+    inner = `<select data-field="${f.id}">` + f.options.map(o=>`<option value="${esc(o)}" ${f.default===o?'selected':''}>${esc(o)}</option>`).join('') + `</select>`;
+  } else if(f.type==='radio'){
+    inner = `<div class="opts" data-field="${f.id}" data-kind="radio">` + f.options.map(o=>
+      `<label class="opt"><input type="radio" name="${f.id}" value="${esc(o)}"><span>${esc(o)}</span></label>`).join('') + `</div>`;
+  } else if(f.type==='checkgroup'){
+    const def = f.default||[];
+    inner = `<div class="opts" data-field="${f.id}" data-kind="checkgroup">` + f.options.map(o=>
+      `<label class="opt check"><input type="checkbox" value="${esc(o)}" ${def.includes(o)?'checked':''}><span>${esc(o)}</span></label>`).join('') + `</div>`;
+  } else if(f.type==='check'){
+    inner = `<div class="opts" data-field="${f.id}" data-kind="check"><label class="opt check"><input type="checkbox" value="yes"><span>Yes</span></label></div>`;
+  } else if(f.type==='repeater'){
+    inner = `<div class="rep-legend"><span>${esc(f.columns[0].ph)}</span><span>${esc(f.columns[1].ph)}</span><span>${esc(f.columns[2].ph)}</span><span></span></div>
+             <div class="rep" data-field="${f.id}" data-kind="repeater"></div>
+             <button type="button" class="rep-add">+ Add type</button>`;
+  }
+  const labelHtml = f.type==='check' ? '' : `<label>${esc(f.label)}</label>`;
+  const hintHtml  = f.hint ? `<span class="hint">${esc(f.hint)}</span>` : '';
+  if(f.type==='check'){
+    return `<div class="field">${hintHtml?`<label>${esc(f.label)}</label>${hintHtml}`:''}
+      <div class="opts" data-field="${f.id}" data-kind="check"><label class="opt check"><input type="checkbox" value="yes"><span>${esc(f.label)}</span></label></div></div>`;
+  }
+  const isReveal = !!f.revealedBy;
+  const revAttrs = isReveal ? ` data-reveal-id="${f.id}" style="display:none;"` : '';
+  return `<div class="field${isReveal?' reveal':''}"${revAttrs}>${labelHtml}${hintHtml}${inner}</div>`;
+}
+
+function renderRepRow(repId, cols, row){
+  row = row||{};
+  const c0=cols[0],c1=cols[1],c2=cols[2];
+  return `<div class="rep-row">
+    <input type="text" data-col="${c0.key}" placeholder="${esc(c0.ph)}" value="${row[c0.key]?esc(row[c0.key]):''}">
+    <input type="text" data-col="${c1.key}" placeholder="${esc(c1.ph)}" value="${row[c1.key]?esc(row[c1.key]):''}">
+    <div class="rep-toggle"><label class="opt check"><input type="checkbox" data-col="${c2.key}" ${row[c2.key]?'checked':''}><span>AI</span></label></div>
+    <button type="button" class="rep-del" title="Remove">&times;</button>
+  </div>`;
+}
+
+let listenersBound = false;
+function render(){
+  root.innerHTML = SCHEMA.map(sec=>`
+    <div class="card">
+      <div class="card-head">
+        <span class="card-num">${esc(sec.num)}</span>
+        <div class="card-titles"><span class="card-title">${esc(sec.title)}</span>${sec.sub?`<span class="card-sub">${esc(sec.sub)}</span>`:''}</div>
+      </div>
+      <div class="card-body">${sec.fields.map(renderField).join('')}</div>
+    </div>`).join('');
+
+  SCHEMA.forEach(sec=>sec.fields.forEach(f=>{
+    if(f.type==='repeater'){
+      const cont = root.querySelector(`.rep[data-field="${f.id}"]`);
+      (f.default||[]).forEach(r=>cont.insertAdjacentHTML('beforeend', renderRepRow(f.id,f.columns,r)));
+    }
+  }));
+
+  if(!listenersBound){
+    root.addEventListener('click',e=>{
+      if(e.target.classList.contains('rep-add')){
+        const cont = e.target.previousElementSibling;
+        const f = fieldById(cont.dataset.field);
+        cont.insertAdjacentHTML('beforeend', renderRepRow(f.id,f.columns,{}));
+        updateProgress();
+      }
+      if(e.target.classList.contains('rep-del')){ e.target.closest('.rep-row').remove(); updateProgress(); }
+    });
+    const onChange = () => { updateReveals(); updateProgress(); setBadge(); };
+    root.addEventListener('input', onChange);
+    root.addEventListener('change', onChange);
+    listenersBound = true;
+  }
+  updateReveals();
+  updateProgress();
+}
+
+function fieldById(id){ for(const s of SCHEMA) for(const f of s.fields) if(f.id===id) return f; }
+
+/* ───────────────────────── COLLECT / SERIALIZE ───────────────────────── */
+function readField(f){
+  const node = root.querySelector(`[data-field="${f.id}"]`);
+  if(!node) return null;
+  if(f.type==='radio'){ const c=node.querySelector('input:checked'); return c?c.value:''; }
+  if(f.type==='checkgroup'){ return [...node.querySelectorAll('input:checked')].map(i=>i.value); }
+  if(f.type==='check'){ return !!node.querySelector('input:checked'); }
+  if(f.type==='repeater'){
+    return [...node.querySelectorAll('.rep-row')].map(r=>{
+      const o={}; f.columns.forEach(c=>{
+        const i=r.querySelector(`[data-col="${c.key}"]`);
+        o[c.key] = c.type==='check' ? i.checked : i.value.trim();
+      });
+      return o;
+    }).filter(o=> o.name || o.length);
+  }
+  if(f.type==='number'){ return node.value; }
+  return node.value;
+}
+
+function collect(){
+  const meta={}, answers={};
+  SCHEMA.forEach(sec=>sec.fields.forEach(f=>{
+    const v = readField(f);
+    if(META_IDS.includes(f.id)) meta[f.id]=v; else answers[f.id]=v;
+  }));
+  return { meta, answers, exportedAt:new Date().toISOString(), schemaVersion:SCHEMA_VERSION };
+}
+
+/* ───────────────────────── HYDRATE (round-trip) ───────────────────────── */
+function setField(f, v){
+  const node = root.querySelector(`[data-field="${f.id}"]`);
+  if(!node || v===undefined || v===null) return;
+  if(f.type==='radio'){ const t=node.querySelector(`input[value="${CSS.escape(v)}"]`); if(t)t.checked=true; return; }
+  if(f.type==='checkgroup'){ node.querySelectorAll('input').forEach(i=>i.checked=Array.isArray(v)&&v.includes(i.value)); return; }
+  if(f.type==='check'){ const i=node.querySelector('input'); if(i)i.checked=!!v; return; }
+  if(f.type==='repeater'){
+    node.innerHTML=''; (Array.isArray(v)?v:[]).forEach(r=>node.insertAdjacentHTML('beforeend',renderRepRow(f.id,f.columns,r))); return;
+  }
+  if(f.type==='number'){ node.value = v; return; }
+  node.value = v;
+}
+function hydrate(rec){
+  if(!rec) return;
+  render();
+  const m=rec.meta||{}, a=rec.answers||{};
+  SCHEMA.forEach(sec=>sec.fields.forEach(f=>{
+    if(META_IDS.includes(f.id)) setField(f, m[f.id]); else setField(f, a[f.id]);
+  }));
+  updateReveals();
+  updateProgress();
+}
+
+/* ───────────────────────── MARKDOWN ───────────────────────── */
+function fmtVal(f,v){
+  if(f.type==='check') return v?'Yes':'—';
+  if(f.type==='checkgroup') return (v&&v.length)? v.join(', ') : '—';
+  if(f.type==='repeater'){
+    if(!v||!v.length) return '—';
+    return '\n'+v.map(r=>`    - ${r.name||'(unnamed)'}${r.length?` — ${r.length}`:''}${r.aiBookable?'  [AI may book]':'  [human callback]'}`).join('\n');
+  }
+  return (v===''||v==null)? '—' : v;
+}
+function toMarkdown(rec){
+  const m=rec.meta;
+  const vert = (m.vertical==='Other' && m.verticalOther) ? `Other — ${m.verticalOther}` : (m.vertical||'—');
+  let md = `# Discovery Call — ${m.practiceName||'(practice)'}\n\n`;
+  md += `- **Vertical:** ${vert}\n- **Contact:** ${m.contactName||'—'}\n- **Date:** ${m.callDate||'—'}\n- **Interviewer:** ${m.interviewer||'—'}\n\n`;
+  SCHEMA.filter(s=>s.id!=='meta').forEach(sec=>{
+    md += `## ${sec.num}. ${sec.title}\n`;
+    sec.fields.forEach(f=>{
+      const v = METAorANS(rec,f);
+      if(f.revealedBy && (v===''||v==null||(Array.isArray(v)&&!v.length))) return;
+      md += `**${f.label}:** ${fmtVal(f,v)}\n\n`;
+    });
+  });
+  md += `\n---\n*Exported ${new Date(rec.exportedAt).toLocaleString()} — Korvo AI Discovery Intake*\n`;
+  return md;
+}
+function METAorANS(rec,f){ return META_IDS.includes(f.id)? rec.meta[f.id] : rec.answers[f.id]; }
+
+function copyMarkdown(){
+  const md = toMarkdown(collect());
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(md).then(()=>toast('Markdown copied to clipboard')).catch(()=>fallbackCopy(md));
+  } else fallbackCopy(md);
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); toast('Copied to clipboard'); }catch(e){ toast('Copy failed'); }
+  document.body.removeChild(ta);
+}
+
+/* ───────────────────────── PROGRESS / REVEALS ───────────────────────── */
+function isActive(f){
+  if(!f.revealedBy) return true;
+  const ctrl = root.querySelector(`[data-field="${f.revealedBy.field}"]`);
+  if(!ctrl) return false;
+  if(f.revealedBy.equals!==undefined){
+    const sel = ctrl.tagName==='SELECT' ? ctrl : ctrl.querySelector('select');
+    return !!sel && sel.value===f.revealedBy.equals;
+  }
+  if(f.revealedBy.includes!==undefined){
+    const cb = ctrl.querySelector(`input[value="${CSS.escape(f.revealedBy.includes)}"]`);
+    return !!cb && cb.checked;
+  }
+  return true;
+}
+function updateReveals(){
+  document.querySelectorAll('.field.reveal').forEach(box=>{
+    const f = fieldById(box.dataset.revealId);
+    box.style.display = (f && isActive(f)) ? '' : 'none';
+  });
+}
+function isFilled(f){
+  const v = readField(f);
+  if(f.type==='check') return v===true;
+  if(f.type==='checkgroup'||f.type==='repeater') return Array.isArray(v)&&v.length>0;
+  return v!==''&&v!=null;
+}
+function updateProgress(){
+  const fields = SCHEMA.flatMap(s=>s.fields).filter(isActive);
+  const done = fields.filter(isFilled).length;
+  document.getElementById('progress').textContent = `${done} / ${fields.length} answered`;
+}
+
+/* ───────────────────────── TOAST ───────────────────────── */
+let toastT;
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ───────────────────────── PERSISTENCE / AUTH ───────────────────────── */
+const API = '/api/discovery';
+let ADMIN_KEY = sessionStorage.getItem('korvoAdminKey') || '';
+let currentId = null;
+
+function authHeaders(extra){ return Object.assign({'x-admin-key':ADMIN_KEY}, extra||{}); }
+
+async function doLogin(){
+  const pwd = document.getElementById('pwd').value.trim();
+  const err = document.getElementById('loginErr');
+  err.textContent='';
+  if(!pwd){ err.textContent='Enter the admin password.'; return; }
+  ADMIN_KEY = pwd;
+  let list;
+  try{
+    const res = await fetch(API, {headers:authHeaders()});
+    if(res.status===401){ err.textContent='Incorrect password.'; ADMIN_KEY=''; return; }
+    if(!res.ok){ err.textContent='Server error ('+res.status+').'; ADMIN_KEY=''; return; }
+    list = await res.json();
+  }catch(e){ err.textContent='Could not reach the server.'; ADMIN_KEY=''; return; }
+  // Auth succeeded — persist the key BEFORE any rendering so a UI error can't log us out.
+  sessionStorage.setItem('korvoAdminKey', ADMIN_KEY);
+  enterApp(list);
+}
+
+function enterApp(list){
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='';
+  render();          // build the form once (kept hidden until a client is opened)
+  renderList(list);  // populate the client cards
+  showList();
+}
+
+function logout(){ sessionStorage.removeItem('korvoAdminKey'); window.location.href='/'; }
+
+/* view switching */
+function showList(){
+  document.getElementById('formView').style.display='none';
+  document.getElementById('listView').style.display='';
+  window.scrollTo(0,0);
+  loadList();
+  loadAppointments();
+}
+
+async function loadAppointments(){
+  const tbody = document.getElementById('apptBody');
+  if(!tbody) return;
+  try{
+    const res = await fetch('/api/appointments', {headers:authHeaders()});
+    if(res.status===401){ logout(); return; }
+    if(!res.ok){ tbody.innerHTML='<tr><td colspan="6" class="td-note">Could not load requests.</td></tr>'; return; }
+    const appts = await res.json();
+    if(!appts.length){ tbody.innerHTML='<tr><td colspan="6" class="td-note">No consultation requests yet.</td></tr>'; return; }
+    tbody.innerHTML = appts.map(a=>`<tr>
+      <td>${esc(a.submitted ? new Date(a.submitted).toLocaleDateString() : '—')}</td>
+      <td>${esc(a.name||'')}</td>
+      <td><a href="mailto:${esc(a.email||'')}">${esc(a.email||'')}</a></td>
+      <td>${esc(a.phone||'—')}</td>
+      <td>${esc(a.service||'—')}</td>
+      <td class="td-msg" title="${esc(a.message||'')}">${esc(a.message||'')}</td>
+    </tr>`).join('');
+  }catch(e){ tbody.innerHTML='<tr><td colspan="6" class="td-note">Could not load requests.</td></tr>'; }
+}
+function showForm(){
+  document.getElementById('listView').style.display='none';
+  document.getElementById('formView').style.display='';
+  window.scrollTo(0,0);
+}
+
+async function loadList(){
+  try{
+    const res = await fetch(API, {headers:authHeaders()});
+    if(res.status===401){ logout(); return; }
+    if(!res.ok) return;
+    renderList(await res.json());
+  }catch(e){ /* ignore */ }
+}
+
+function renderList(list){
+  const c = document.getElementById('clientGrid');
+  const count = document.getElementById('clientCount');
+  if(count) count.textContent = (list && list.length) ? `${list.length} client${list.length===1?'':'s'}` : '';
+  if(!list || !list.length){
+    c.innerHTML = '<div class="client-empty"><div class="ce-title">No clients yet</div><div>Hit &ldquo;+ New client&rdquo; to create your first one.</div></div>';
+    return;
+  }
+  c.innerHTML = list.map(r=>{
+    const name = r.practiceName || '(unnamed client)';
+    const tag  = r.vertical ? `<span class="cc-tag">${esc(r.vertical)}</span>` : '';
+    const bits = [];
+    if(r.contactName) bits.push(esc(r.contactName));
+    if(r.callDate)    bits.push('Call: ' + esc(r.callDate));
+    if(r.updatedAt)   bits.push('Updated ' + esc(new Date(r.updatedAt).toLocaleDateString()));
+    return `<div class="client-card" onclick="openCall('${r.id}')">
+      <button class="cc-del" title="Delete" onclick="event.stopPropagation();deleteCall('${r.id}')">&times;</button>
+      <div class="cc-name">${esc(name)}</div>
+      <div class="cc-tags">${tag}</div>
+      <div class="cc-meta">${bits.join('<br>') || '&mdash;'}</div>
+    </div>`;
+  }).join('');
+}
+
+async function openCall(id){
+  try{
+    const res = await fetch(API+'/'+id, {headers:authHeaders()});
+    if(res.status===401){ logout(); return; }
+    if(!res.ok){ toast('Could not load client'); return; }
+    const rec = await res.json();
+    hydrate(rec);
+    currentId = rec.id;
+    setBadge();
+    showForm();
+  }catch(e){ toast('Could not load client'); }
+}
+
+async function saveCall(){
+  const rec = collect();
+  const method = currentId ? 'PUT' : 'POST';
+  const url = currentId ? API+'/'+currentId : API;
+  try{
+    const res = await fetch(url, {method, headers:authHeaders({'Content-Type':'application/json'}), body:JSON.stringify(rec)});
+    if(res.status===401){ logout(); return; }
+    if(!res.ok){ toast('Save failed'); return; }
+    const saved = await res.json();
+    currentId = saved.id;
+    setBadge();
+    loadList();
+    toast(method==='POST' ? 'Saved' : 'Updated');
+  }catch(e){ toast('Save failed'); }
+}
+
+function newCall(){
+  // Warn only if we're already editing a form (avoid losing unsaved work).
+  const inForm = document.getElementById('formView').style.display !== 'none';
+  if(inForm && !confirm('Start a new client? Unsaved changes will be lost.')) return;
+  render();
+  currentId = null;
+  setBadge();
+  showForm();
+}
+
+async function deleteCall(id){
+  if(!confirm('Delete this saved client? This cannot be undone.')) return;
+  try{
+    const res = await fetch(API+'/'+id, {method:'DELETE', headers:authHeaders()});
+    if(res.status===401){ logout(); return; }
+    if(!res.ok){ toast('Delete failed'); return; }
+    if(id===currentId){ currentId=null; setBadge(); }
+    loadList();
+    toast('Deleted');
+  }catch(e){ toast('Delete failed'); }
+}
+
+function setBadge(){
+  const b = document.getElementById('recBadge');
+  if(!b) return;
+  if(currentId){
+    const name = (readField(fieldById('practiceName'))||'').trim();
+    b.textContent = 'Editing: ' + (name || 'saved client');
+    b.classList.add('editing');
+  } else {
+    b.textContent = 'New client';
+    b.classList.remove('editing');
+  }
+}
+
+document.getElementById('pwd').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+
+/* auto-resume if a key is already in this session */
+(function(){
+  if(!ADMIN_KEY) return;
+  fetch(API, {headers:authHeaders()}).then(res=>{
+    if(res.ok) return res.json().then(enterApp);
+    sessionStorage.removeItem('korvoAdminKey'); ADMIN_KEY='';
+  }).catch(()=>{});
+})();
+</script>
 </body>
 </html>
