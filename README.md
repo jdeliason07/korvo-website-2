@@ -31,14 +31,20 @@ The intake form saves through `/api/discovery` (list/create) and
 
 ### Deploying on Railway
 
-1. Create a service from this repo. Railway uses the `Procfile`
-   (`web: node app.js`) and runs `npm install` automatically.
-2. Set env vars: `ADMIN_PASS`, `RESEND_API_KEY`, `MAIL_TO`.
-3. For persistent discovery-call storage, pick one:
-   - **Add a Postgres database** (Railway → New → Database → Postgres). It
-     injects `DATABASE_URL` automatically — nothing else to do.
-   - **Or attach a volume** and set `DATA_DIR` to its mount path (e.g. `/data`)
-     so the JSON fallback survives redeploys.
+1. Create a service from this repo. Railway reads `railway.json` / the
+   `Procfile` (`node app.js`) and runs `npm install` automatically.
+2. Set env vars on the service: `ADMIN_PASS`, `RESEND_API_KEY`, `MAIL_TO`.
+3. **Add Postgres for permanent storage** (the important step):
+   - In your Railway **project**, click **New → Database → Add PostgreSQL**.
+   - Open your **web service → Variables → New Variable → Add Reference**, and
+     reference the Postgres service's `DATABASE_URL` (or use Railway's
+     "Connect" which adds it for you).
+   - Redeploy. On boot the log prints `Discovery store ready (Postgres)` and the
+     `discovery_calls` table is created automatically. Saved calls now survive
+     every redeploy. SSL is auto-detected (off for the internal URL).
 
-Without one of these, file storage still works but lives on the container's
-ephemeral disk and is lost on redeploy.
+   _Alternative:_ skip Postgres, attach a **Volume** to the service, and set
+   `DATA_DIR` to its mount path (e.g. `/data`) to persist the JSON fallback.
+
+Without Postgres or a volume, file storage still works but lives on the
+container's ephemeral disk and is lost on redeploy.
